@@ -7,22 +7,22 @@ This plan breaks down the development of the Enhanced Biesse Chat Assistant into
 ## Phase 1: Infrastructure & Database Setup
 **Goal:** Establish the foundational environment and data storage layers.
 
-- [ ] **1.1 Environment Setup**
-    - [ ] Initialize `backend/` directory with `venv`.
-    - [ ] Install dependencies: `fastapi`, `uvicorn`, `sqlalchemy`, `chromadb`, `pymupdf`, `google-generativeai`.
-    - [ ] Create `config.py` for environment variables (API Keys).
+- [✓] **1.1 Environment Setup**
+    - [✓] Initialize `backend/` directory with `venv`.
+    - [✓] Install dependencies: `fastapi`, `uvicorn`, `sqlalchemy`, `chromadb`, `pymupdf`, `google-generativeai`.
+    - [✓] Create `config.py` for environment variables (API Keys).
 
-- [ ] **1.2 Database Implementation (SQLite)**
-    - [ ] Create `database.py` (SQLAlchemy engine & session).
-    - [ ] Define Models in `models.py`:
-        - [ ] `Conversation` (id, title, created_at, memory_enabled).
-        - [ ] `Message` (id, role, content, sources, actions).
-        - [ ] `File` (id, filename, path).
-    - [ ] Run initial migration (create tables).
+- [✓] **1.2 Database Implementation (SQLite)**
+    - [✓] Create `database.py` (SQLAlchemy engine & session).
+    - [✓] Define Models in `models.py`:
+        - [✓] `Conversation` (id, title, created_at, memory_enabled).
+        - [✓] `Message` (id, role, content, sources, actions).
+        - [✓] `File` (id, filename, path).
+    - [✓] Run initial migration (create tables).
 
-- [ ] **1.3 Vector DB Setup (ChromaDB)**
-    - [ ] Initialize Persistent Client in `services/vector_service.py`.
-    - [ ] Create collection `biesse_manuals`.
+- [✓] **1.3 Vector DB Setup (ChromaDB)**
+    - [✓] Initialize Persistent Client in `services/vector_service.py`.
+    - [✓] Create collection `biesse_manuals`.
 
 ---
 
