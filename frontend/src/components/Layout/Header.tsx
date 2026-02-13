@@ -2,9 +2,10 @@
 
 import React from "react";
 import { Settings, Wifi, WifiOff } from "lucide-react";
+import { useChatStore } from "@/lib/store";
 
 export default function Header() {
-  const [isConnected, setIsConnected] = React.useState(true);
+  const { isConnected } = useChatStore();
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-white px-6 dark:bg-zinc-950">

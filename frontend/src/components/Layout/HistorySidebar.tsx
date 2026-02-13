@@ -13,7 +13,8 @@ export default function HistorySidebar() {
     setCurrentConversationId,
     setMessages,
     setMemoryEnabled,
-    setLoading
+    setLoading,
+    setAttachedFiles
   } = useChatStore();
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function HistorySidebar() {
       setCurrentConversationId(newConv.id);
       setMessages([]);
       setMemoryEnabled(true);
+      setAttachedFiles([]);
     } catch (error) {
       console.error("Failed to create new chat", error);
     } finally {
@@ -52,6 +54,10 @@ export default function HistorySidebar() {
       setCurrentConversationId(id);
       setMessages(data.messages);
       setMemoryEnabled(data.memory_enabled);
+      
+      // Fetch files
+      const files = await chatApi.getFiles(id);
+      setAttachedFiles(files);
     } catch (error) {
       console.error("Failed to fetch conversation details", error);
     } finally {

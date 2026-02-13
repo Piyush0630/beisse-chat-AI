@@ -15,12 +15,21 @@ export interface Conversation {
   memory_enabled: boolean;
 }
 
+export interface FileItem {
+  id: string;
+  filename: string;
+  processed: boolean;
+  file_type?: string;
+}
+
 interface ChatState {
   messages: Message[];
   conversations: Conversation[];
   currentConversationId: string | null;
   memoryEnabled: boolean;
   isLoading: boolean;
+  isConnected: boolean;
+  attachedFiles: FileItem[];
   pdfConfig: {
     fileUrl: string | null;
     pageNumber: number;
@@ -34,8 +43,11 @@ interface ChatState {
   setCurrentConversationId: (id: string | null) => void;
   setMemoryEnabled: (enabled: boolean) => void;
   setLoading: (loading: boolean) => void;
+  setConnected: (connected: boolean) => void;
   clearMessages: () => void;
   setPdfConfig: (config: Partial<ChatState['pdfConfig']>) => void;
+  setAttachedFiles: (files: FileItem[]) => void;
+  addAttachedFile: (file: FileItem) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -44,6 +56,8 @@ export const useChatStore = create<ChatState>((set) => ({
   currentConversationId: null,
   memoryEnabled: true,
   isLoading: false,
+  isConnected: true,
+  attachedFiles: [],
   pdfConfig: {
     fileUrl: null,
     pageNumber: 1,
@@ -59,8 +73,13 @@ export const useChatStore = create<ChatState>((set) => ({
   setCurrentConversationId: (id) => set({ currentConversationId: id }),
   setMemoryEnabled: (enabled) => set({ memoryEnabled: enabled }),
   setLoading: (loading) => set({ isLoading: loading }),
+  setConnected: (connected) => set({ isConnected: connected }),
   clearMessages: () => set({ messages: [] }),
   setPdfConfig: (config) => set((state) => ({
     pdfConfig: { ...state.pdfConfig, ...config }
+  })),
+  setAttachedFiles: (files) => set({ attachedFiles: files }),
+  addAttachedFile: (file) => set((state) => ({
+    attachedFiles: [...state.attachedFiles, file]
   })),
 }));

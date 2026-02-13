@@ -15,6 +15,7 @@ from .services.vector_service import vector_service
 from .core.rag_pipeline import rag_pipeline
 from .core.action_detector import action_detector
 from .config import settings
+from .api.files import router as files_router
 
 # Initialize tables
 models.Base.metadata.create_all(bind=engine)
@@ -34,6 +35,8 @@ app.add_middleware(
 if not os.path.exists(settings.UPLOAD_DIR):
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/files", StaticFiles(directory=settings.UPLOAD_DIR), name="files")
+
+app.include_router(files_router)
 
 class ChatRequest(BaseModel):
     query: str
@@ -117,62 +120,6 @@ def health_check(db: Session = Depends(get_db)):
         "vector_count": count
     }
 
-@app.post("/upload")
-async def upload_document(
-    file: UploadFile = FastAPIFile(...),
-    conversation_id: Optional[str] = None,
-    db: Session = Depends(get_db)
-):
-    if not file.filename.endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
-    
-    # Create conversation if not provided
-    if not conversation_id:
-        conv = models.Conversation(title=f"Chat with {file.filename}")
-        db.add(conv)
-        db.commit()
-        db.refresh(conv)
-        conversation_id = conv.id
-    
-    # Save file locally
-    file_id = str(uuid.uuid4())
-    file_ext = os.path.splitext(file.filename)[1]
-    saved_filename = f"{file_id}{file_ext}"
-    file_path = os.path.join(settings.UPLOAD_DIR, saved_filename)
-    
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    # Save to database
-    db_file = models.File(
-        id=file_id,
-        conversation_id=conversation_id,
-        filename=file.filename,
-        filepath=file_path,
-        file_type="pdf"
-    )
-    db.add(db_file)
-    db.commit()
-    db.refresh(db_file)
-    
-    # Ingest into RAG pipeline
-    try:
-        chunks_count = rag_pipeline.ingest_document(file_path, file.filename)
-        db_file.processed = True
-        db.commit()
-    except Exception as e:
-        # In case of error, we might want to keep the record but marked as not processed
-        # For now, let's just log and raise
-        print(f"Error processing document: {e}")
-        raise HTTPException(status_code=500, detail=f"Error processing document: {str(e)}")
-        
-    return {
-        "filename": file.filename,
-        "conversation_id": conversation_id,
-        "chunks_ingested": chunks_count,
-        "file_id": db_file.id
-    }
-
 @app.post("/chat")
 async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     # 1. Get or create conversation
@@ -220,8 +167,24 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
             history.append({"role": msg.role, "content": msg.content})
     
     # 4. Query RAG pipeline
+    # Fetch additional file context (text files uploaded to this conversation)
+    additional_context = ""
+    files = db.query(models.File).filter(
+        models.File.conversation_id == conversation_id,
+        models.File.processed == False
+    ).all()
+    
+    for file in files:
+        if file.filename.endswith(('.txt', '.csv', '.md')):
+            try:
+                if os.path.exists(file.filepath):
+                    with open(file.filepath, 'r', encoding='utf-8') as f:
+                        additional_context += f"\n---\nFile: {file.filename}\nContent:\n{f.read()}\n"
+            except Exception as e:
+                print(f"Error reading file {file.filename}: {e}")
+
     try:
-        result = rag_pipeline.query(request.query, history=history)
+        result = rag_pipeline.query(request.query, history=history, additional_context=additional_context)
     except Exception as e:
         print(f"Error in RAG pipeline: {e}")
         raise HTTPException(status_code=500, detail=f"Error in RAG pipeline: {str(e)}")

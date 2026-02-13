@@ -50,7 +50,7 @@ class RAGPipeline:
         
         return len(ids)
 
-    def query(self, question: str, n_results: int = 5, history: List[Dict[str, str]] = None) -> Dict[str, Any]:
+    def query(self, question: str, n_results: int = 5, history: List[Dict[str, str]] = None, additional_context: str = "") -> Dict[str, Any]:
         """
         Retrieves relevant document chunks and generates an answer using context and history.
         """
@@ -80,6 +80,8 @@ class RAGPipeline:
                 })
             
         context = "\n---\n".join(retrieved_texts)
+        if additional_context:
+            context += f"\n\nAdditional File Context:\n{additional_context}"
         
         # 4. Generate answer using LLM (with history)
         answer = llm_service.generate_answer(question, context, history)
