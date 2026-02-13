@@ -1,4 +1,5 @@
 import google.generativeai as genai
+from typing import List, Dict
 from backend.config import settings
 
 # Configure Gemini API
@@ -17,14 +18,23 @@ class LLMService:
             }
         )
 
-    def generate_answer(self, query: str, context: str) -> str:
+    def generate_answer(self, query: str, context: str, history: List[Dict[str, str]] = None) -> str:
         """
-        Generates an answer based on the provided query and context.
+        Generates an answer based on the provided query, context, and conversation history.
         """
+        history_text = ""
+        if history:
+            history_text = "\nConversation History:\n"
+            for msg in history:
+                role = "User" if msg["role"] == "user" else "Assistant"
+                history_text += f"{role}: {msg['content']}\n"
+
         prompt = f"""
-You are a helpful assistant for Biesse. Use the following context to answer the user's question.
+You are a helpful assistant for Biesse. Use the following context and conversation history to answer the user's question.
 If the context doesn't contain the answer, say you don't know based on the provided documents.
 Always include citations to the context if possible.
+
+{history_text}
 
 Context:
 {context}

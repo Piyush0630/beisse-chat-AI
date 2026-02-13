@@ -32,9 +32,59 @@ class ChatRequest(BaseModel):
     query: str
     conversation_id: Optional[str] = None
 
+class ConversationUpdate(BaseModel):
+    memory_enabled: Optional[bool] = None
+    title: Optional[str] = None
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Biesse Chat Assistant API"}
+
+@app.get("/conversations")
+def get_conversations(db: Session = Depends(get_db)):
+    conversations = db.query(models.Conversation).order_by(models.Conversation.updated_at.desc()).all()
+    return conversations
+
+@app.post("/conversations/new")
+def create_conversation(db: Session = Depends(get_db)):
+    conv = models.Conversation(title="New Chat")
+    db.add(conv)
+    db.commit()
+    db.refresh(conv)
+    return conv
+
+@app.get("/conversations/{conversation_id}")
+def get_conversation(conversation_id: str, db: Session = Depends(get_db)):
+    conv = db.query(models.Conversation).filter(models.Conversation.id == conversation_id).first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    # Load messages
+    messages = db.query(models.Message).filter(models.Message.conversation_id == conversation_id).order_by(models.Message.timestamp.asc()).all()
+    
+    return {
+        "id": conv.id,
+        "title": conv.title,
+        "memory_enabled": conv.memory_enabled,
+        "created_at": conv.created_at,
+        "updated_at": conv.updated_at,
+        "messages": messages
+    }
+
+@app.patch("/conversations/{conversation_id}")
+def update_conversation(conversation_id: str, request: ConversationUpdate, db: Session = Depends(get_db)):
+    conv = db.query(models.Conversation).filter(models.Conversation.id == conversation_id).first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    if request.memory_enabled is not None:
+        conv.memory_enabled = request.memory_enabled
+    if request.title is not None:
+        conv.title = request.title
+        
+    db.commit()
+    db.refresh(conv)
+    return conv
 
 @app.get("/health")
 def health_check(db: Session = Depends(get_db)):
@@ -139,16 +189,37 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
         content=request.query
     )
     db.add(user_msg)
+    
+    # Update conversation timestamp and title if it's the first message
+    conv.updated_at = models.datetime.utcnow()
+    if conv.title == "New Chat" or len(conv.title) < 5:
+        conv.title = request.query[:50]
+        
     db.commit()
     
-    # 3. Query RAG pipeline
+    # 3. Fetch history if memory is enabled
+    history = []
+    if conv.memory_enabled:
+        # Fetch last 5 messages (excluding the one we just added)
+        past_messages = db.query(models.Message)\
+            .filter(models.Message.conversation_id == conversation_id)\
+            .filter(models.Message.id != user_msg.id)\
+            .order_by(models.Message.timestamp.desc())\
+            .limit(5)\
+            .all()
+        
+        # Reverse to get chronological order
+        for msg in reversed(past_messages):
+            history.append({"role": msg.role, "content": msg.content})
+    
+    # 4. Query RAG pipeline
     try:
-        result = rag_pipeline.query(request.query)
+        result = rag_pipeline.query(request.query, history=history)
     except Exception as e:
         print(f"Error in RAG pipeline: {e}")
         raise HTTPException(status_code=500, detail=f"Error in RAG pipeline: {str(e)}")
         
-    # 4. Save assistant message
+    # 5. Save assistant message
     assistant_msg = models.Message(
         conversation_id=conversation_id,
         role="assistant",

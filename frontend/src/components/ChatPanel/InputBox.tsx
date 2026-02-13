@@ -7,7 +7,7 @@ import { chatApi } from "@/lib/api";
 
 export default function InputBox() {
   const [input, setInput] = React.useState("");
-  const { addMessage, isLoading, setLoading } = useChatStore();
+  const { addMessage, isLoading, setLoading, currentConversationId, setCurrentConversationId, setConversations } = useChatStore();
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -19,19 +19,28 @@ export default function InputBox() {
     };
 
     addMessage(userMessage);
+    const query = input.trim();
     setInput("");
     setLoading(true);
 
     try {
-      const response = await chatApi.sendMessage(userMessage.content);
+      const response = await chatApi.sendMessage(query, currentConversationId || undefined);
       
+      // If it was a new conversation, update the current id and refresh the sidebar
+      if (!currentConversationId && response.conversation_id) {
+        setCurrentConversationId(response.conversation_id);
+        const convs = await chatApi.getConversations();
+        setConversations(convs);
+      }
+
       const assistantMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant' as const,
         content: response.answer,
         sources: response.sources?.map((s: any) => ({
           page: s.page,
-          manual: s.manual_name || s.manual_file
+          filename: s.filename,
+          bbox: s.bbox
         }))
       };
 

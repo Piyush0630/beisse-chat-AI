@@ -50,9 +50,9 @@ class RAGPipeline:
         
         return len(ids)
 
-    def query(self, question: str, n_results: int = 5) -> Dict[str, Any]:
+    def query(self, question: str, n_results: int = 5, history: List[Dict[str, str]] = None) -> Dict[str, Any]:
         """
-        Retrieves relevant document chunks and generates an answer.
+        Retrieves relevant document chunks and generates an answer using context and history.
         """
         # 1. Embed the query
         query_embedding = embedding_service.get_embedding(question)
@@ -81,8 +81,8 @@ class RAGPipeline:
             
         context = "\n---\n".join(retrieved_texts)
         
-        # 4. Generate answer using LLM
-        answer = llm_service.generate_answer(question, context)
+        # 4. Generate answer using LLM (with history)
+        answer = llm_service.generate_answer(question, context, history)
         
         return {
             "answer": answer,

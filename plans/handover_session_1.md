@@ -1,7 +1,7 @@
-# Session Handover - Session 1 & 2
+# Session Handover - Session 4
 **Date:** February 13, 2026
-**Current Phase:** Phase 2 (Completed)
-**Next Phase:** Phase 3 (Core Frontend & Chat Interface)
+**Current Phase:** Phase 4 (Completed)
+**Next Phase:** Phase 5 (Actions & Interactive Citations)
 
 ## Accomplished in Session 1
 ### 1. Backend Environment Setup
@@ -83,11 +83,39 @@
 - Integrated `react-pdf` for document visualization.
 - Implemented basic navigation (Prev/Next page) and zoom controls.
 
+### 6. Source Control
+- Staged all Phase 3 changes and committed to GitHub.
+- Commit: `Implement Phase 3: Core Frontend & Chat Interface Shell`.
+
 ## Current State of the Project
 - Backend (Phase 1-2) and Frontend (Phase 3) core shells are fully functional.
 - The application now supports a full end-to-end loop: Query -> RAG -> Response -> UI Display.
 
-## Next Steps (Phase 4)
-1. **Backend History Logic:** Update `POST /chat` to persist messages and implement conversation retrieval endpoints.
-2. **Memory Control:** Implement logic to fetch previous context based on the memory toggle.
-3. **Frontend History:** Connect the sidebar to the real conversation history API.
+## Accomplished in Session 4 (Phase 4)
+### 1. Backend History & Memory Logic
+- Updated `POST /chat` to persist messages to SQLite and include conversation context when memory is enabled.
+- Implemented new API endpoints:
+    - `GET /conversations`: Retrieves all conversations sorted by recency.
+    - `GET /conversations/{id}`: Loads a specific conversation with its full message history.
+    - `POST /conversations/new`: Creates a new empty conversation.
+    - `PATCH /conversations/{id}`: Allows toggling `memory_enabled` and updating titles.
+- Updated `LLMService` and `RAGPipeline` to support conversation history in prompts.
+
+### 2. Frontend History & Memory Integration
+- Updated `useChatStore` to manage multiple conversations and the global memory toggle state.
+- Enhanced `HistorySidebar` with real data:
+    - Fetches and displays the list of recent chats on load.
+    - Supports switching between conversations.
+    - Implemented "New Chat" button functionality.
+- Connected the `Memory Mode` toggle in the `ChatPanel` to the backend.
+- Updated `InputBox` to handle conversation creation and selection automatically.
+
+## Current State of the Project
+- The application now supports persistent chat history and context-aware conversations.
+- Users can switch between different chat sessions and toggle whether the AI should remember previous messages.
+- Full end-to-end integration for Phase 4 is complete.
+
+## Next Steps (Phase 5)
+1. **Backend Action Detection:** Implement logic to detect user intents like "View Dashboard" or "Open PDF".
+2. **Frontend Action Buttons:** Render interactive buttons in the chat based on detected actions.
+3. **Interactive Citations:** Connect citations to the PDF viewer to automatically navigate and highlight relevant sections.

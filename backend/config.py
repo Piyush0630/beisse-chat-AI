@@ -2,6 +2,10 @@ import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 
+# Get the directory of the current file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ENV_FILE = os.path.join(BASE_DIR, ".env")
+
 class Settings(BaseSettings):
     # API Keys
     GOOGLE_API_KEY: str = ""
@@ -19,7 +23,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     APP_NAME: str = "Biesse Chat Assistant"
     
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 
 settings = Settings()
 

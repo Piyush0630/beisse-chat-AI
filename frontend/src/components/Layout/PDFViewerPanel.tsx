@@ -3,8 +3,8 @@
 import React from "react";
 import { Maximize2, Minimize2, Search, ZoomIn, ZoomOut, ChevronLeft, ChevronRight } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 
 // Set up the worker for react-pdf
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;

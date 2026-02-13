@@ -76,27 +76,27 @@ This plan breaks down the development of the Enhanced Biesse Chat Assistant into
 ## Phase 4: V2 Feature - History & Memory
 **Goal:** Implement persistent conversations and the "Memory" toggle.
 
-- [ ] **4.1 Backend History Logic**
-    - [ ] Update `POST /chat` to save messages to SQLite.
-    - [ ] Create `GET /conversations` endpoint (List all).
-    - [ ] Create `GET /conversations/{id}` endpoint (Load history).
-    - [ ] Implement `POST /conversations/new` endpoint.
+- [✓] **4.1 Backend History Logic**
+    - [✓] Update `POST /chat` to save messages to SQLite.
+    - [✓] Create `GET /conversations` endpoint (List all).
+    - [✓] Create `GET /conversations/{id}` endpoint (Load history).
+    - [✓] Implement `POST /conversations/new` endpoint.
 
-- [ ] **4.2 Memory Control Logic**
-    - [ ] Update `models.py` with `memory_enabled` flag.
-    - [ ] Update RAG Pipeline to respect `memory_enabled`:
-        - [ ] If `True`: Fetch last 5 messages from DB & append to context.
-        - [ ] If `False`: Use only current query.
+- [✓] **4.2 Memory Control Logic**
+    - [✓] Update `models.py` with `memory_enabled` flag.
+    - [✓] Update RAG Pipeline to respect `memory_enabled`:
+        - [✓] If `True`: Fetch last 5 messages from DB & append to context.
+        - [✓] If `False`: Use only current query.
 
-- [ ] **4.3 Frontend History Sidebar**
-    - [ ] Create `components/Layout/HistorySidebar.tsx`.
-    - [ ] Implement Time Grouping Logic (Today, Yesterday, Last 7 Days).
-    - [ ] Connect to `GET /conversations`.
-    - [ ] Implement "New Chat" button behavior.
+- [✓] **4.3 Frontend History Sidebar**
+    - [✓] Create `components/Layout/HistorySidebar.tsx`.
+    - [✓] Implement Time Grouping Logic (Today, Yesterday, Last 7 Days).
+    - [✓] Connect to `GET /conversations`.
+    - [✓] Implement "New Chat" button behavior.
 
-- [ ] **4.4 Memory UI**
-    - [ ] Create `components/ChatPanel/MemoryControl.tsx` (Toggle Switch).
-    - [ ] Connect toggle to API (Update conversation state).
+- [✓] **4.4 Memory UI**
+    - [✓] Create `components/ChatPanel/MemoryControl.tsx` (Toggle Switch).
+    - [✓] Connect toggle to API (Update conversation state).
 
 ---
 

@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
+import dynamic from "next/dynamic";
 import HistorySidebar from "./HistorySidebar";
 import ChatPanel from "../ChatPanel/ChatPanel";
-import PDFViewerPanel from "./PDFViewerPanel";
+
+const PDFViewerPanel = dynamic(() => import("./PDFViewerPanel"), { ssr: false });
 
 export default function MainContent() {
   return (
@@ -13,13 +15,13 @@ export default function MainContent() {
         <HistorySidebar />
       </div>
       
-      {/* 30% Chat */}
-      <div className="w-[30%] min-w-[350px]">
+      {/* 50% Chat */}
+      <div className="w-1/2 min-w-[450px]">
         <ChatPanel />
       </div>
       
-      {/* 50% PDF Viewer */}
-      <div className="flex-1">
+      {/* 30% PDF Viewer */}
+      <div className="w-[30%] min-w-[300px]">
         <PDFViewerPanel />
       </div>
     </div>
