@@ -98,6 +98,25 @@ def update_conversation(conversation_id: str, request: ConversationUpdate, db: S
     db.refresh(conv)
     return conv
 
+@app.delete("/conversations/{conversation_id}")
+def delete_conversation(conversation_id: str, db: Session = Depends(get_db)):
+    conv = db.query(models.Conversation).filter(models.Conversation.id == conversation_id).first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    # Files are handled by cascade delete in DB, but we should also delete physical files if any
+    files = db.query(models.File).filter(models.File.conversation_id == conversation_id).all()
+    for file in files:
+        if os.path.exists(file.filepath):
+            try:
+                os.remove(file.filepath)
+            except Exception as e:
+                print(f"Error deleting file {file.filepath}: {e}")
+
+    db.delete(conv)
+    db.commit()
+    return {"message": "Conversation deleted successfully"}
+
 @app.get("/health")
 def health_check(db: Session = Depends(get_db)):
     # Check Database

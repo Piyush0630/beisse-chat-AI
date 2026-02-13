@@ -102,6 +102,10 @@ export const chatApi = {
     const response = await api.get(`/api/files/${conversationId}`);
     return response.data;
   },
+  deleteConversation: async (id: string) => {
+    const response = await api.delete(`/conversations/${id}`);
+    return response.data;
+  },
   deleteFile: async (fileId: string) => {
     const response = await api.delete(`/api/files/${fileId}`);
     return response.data;

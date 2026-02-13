@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { useChatStore } from "@/lib/store";
 import { chatApi } from "@/lib/api";
-import { MessageSquare, Plus } from "lucide-react";
+import { MessageSquare, Plus, Trash2 } from "lucide-react";
 
 export default function HistorySidebar() {
   const { 
@@ -70,6 +70,23 @@ export default function HistorySidebar() {
     }
   };
 
+  const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this conversation?")) return;
+
+    try {
+      await chatApi.deleteConversation(id);
+      setConversations(conversations.filter(c => c.id !== id));
+      if (currentConversationId === id) {
+        setCurrentConversationId(null);
+        setMessages([]);
+        setAttachedFiles([]);
+      }
+    } catch (error) {
+      console.error("Failed to delete conversation", error);
+    }
+  };
+
   return (
     <aside className="w-full h-full border-r bg-zinc-50 dark:bg-zinc-900/50 flex flex-col overflow-hidden">
       <div className="p-4 border-b">
@@ -100,17 +117,24 @@ export default function HistorySidebar() {
               <p className="text-sm text-zinc-500 italic px-3">No conversations yet</p>
             ) : (
               conversations.map((conv) => (
-                <div 
+                <div
                   key={conv.id}
                   onClick={() => handleSelectConversation(conv.id)}
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm cursor-pointer transition-colors ${
-                    currentConversationId === conv.id 
-                      ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400" 
+                  className={`group flex items-center gap-2 rounded-md px-3 py-2 text-sm cursor-pointer transition-colors ${
+                    currentConversationId === conv.id
+                      ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
                       : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
                   }`}
                 >
                   <MessageSquare className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{conv.title}</span>
+                  <span className="truncate flex-1">{conv.title}</span>
+                  <button
+                    onClick={(e) => handleDeleteConversation(e, conv.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-600 transition-all"
+                    title="Delete conversation"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               ))
             )}

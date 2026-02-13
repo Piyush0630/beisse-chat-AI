@@ -3,9 +3,11 @@
 import React from "react";
 import { Settings, Wifi, WifiOff } from "lucide-react";
 import { useChatStore } from "@/lib/store";
+import SettingsModal from "../Modals/SettingsModal";
 
 export default function Header() {
   const { isConnected } = useChatStore();
+  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-white px-6 dark:bg-zinc-950">
@@ -31,10 +33,19 @@ export default function Header() {
           )}
         </div>
         
-        <button className="rounded-full p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+        <button
+          onClick={() => setIsSettingsOpen(true)}
+          className="rounded-full p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          title="Settings"
+        >
           <Settings className="h-5 w-5" />
         </button>
       </div>
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </header>
   );
 }
