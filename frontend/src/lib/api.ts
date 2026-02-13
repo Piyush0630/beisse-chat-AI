@@ -91,7 +91,7 @@ export const chatApi = {
   uploadFile: async (conversationId: string, file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post(`/files/upload?conversation_id=${conversationId}`, formData, {
+    const response = await api.post(`/api/files/upload?conversation_id=${conversationId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -99,11 +99,11 @@ export const chatApi = {
     return response.data;
   },
   getFiles: async (conversationId: string) => {
-    const response = await api.get(`/files/${conversationId}`);
+    const response = await api.get(`/api/files/${conversationId}`);
     return response.data;
   },
   deleteFile: async (fileId: string) => {
-    const response = await api.delete(`/files/${fileId}`);
+    const response = await api.delete(`/api/files/${fileId}`);
     return response.data;
   },
 };

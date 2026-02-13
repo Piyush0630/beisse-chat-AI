@@ -10,7 +10,7 @@ from .. import models
 from ..config import settings
 from ..core.rag_pipeline import rag_pipeline
 
-router = APIRouter(prefix="/files", tags=["files"])
+router = APIRouter(prefix="/api/files", tags=["files"])
 
 @router.post("/upload")
 async def upload_document(

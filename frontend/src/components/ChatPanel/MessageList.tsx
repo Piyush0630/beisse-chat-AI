@@ -49,7 +49,7 @@ export default function MessageList() {
                       filename: src.filename,
                       pageNumber: src.page,
                       highlights: src.bbox ? [src.bbox] : [],
-                      fileUrl: `${API_BASE_URL}/files/${src.filename}`
+                      fileUrl: `${API_BASE_URL}/files/${src.rel_path || src.filename}`
                     })}
                     className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
                   >

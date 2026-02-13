@@ -12,6 +12,10 @@ class RAGPipeline:
         Processes a PDF document, chunks it, embeds chunks, and stores them in the vector database.
         Returns the number of chunks ingested.
         """
+        import os
+        from backend.config import settings
+        rel_path = os.path.relpath(file_path, settings.UPLOAD_DIR).replace('\\', '/')
+        
         # 1. Extract text and bounding boxes
         blocks = extract_text_and_bbox(file_path)
         
@@ -36,6 +40,7 @@ class RAGPipeline:
             ids.append(chunk_id)
             metadatas.append({
                 "filename": filename,
+                "rel_path": rel_path,
                 "page": chunk["page"],
                 "bbox": json.dumps(chunk["bbox"]),
                 "text": chunk["text"]  # Store text in metadata for easy retrieval
@@ -99,6 +104,7 @@ class RAGPipeline:
                 retrieved_texts.append(metadata['text'])
                 sources.append({
                     "filename": metadata['filename'],
+                    "rel_path": metadata.get('rel_path', metadata['filename']),
                     "page": metadata['page'],
                     "bbox": json.loads(metadata['bbox'])
                 })

@@ -6,7 +6,7 @@ from backend.config import settings
 genai.configure(api_key=settings.GOOGLE_API_KEY)
 
 class EmbeddingService:
-    def __init__(self, model_name: str = "models/embedding-001"):
+    def __init__(self, model_name: str = settings.EMBEDDING_MODEL):
         self.model_name = model_name
 
     def get_embedding(self, text: str) -> List[float]:

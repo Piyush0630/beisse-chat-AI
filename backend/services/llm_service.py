@@ -6,7 +6,7 @@ from backend.config import settings
 genai.configure(api_key=settings.GOOGLE_API_KEY)
 
 class LLMService:
-    def __init__(self, model_name: str = "gemini-2.0-flash-exp"):
+    def __init__(self, model_name: str = settings.LLM_MODEL):
         self.model_name = model_name
         self.model = genai.GenerativeModel(
             model_name=self.model_name,

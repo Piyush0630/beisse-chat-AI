@@ -4,7 +4,7 @@ export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  sources?: { page: number; filename: string; bbox: any }[];
+  sources?: { page: number; filename: string; rel_path?: string; bbox: any }[];
   actions?: { id: string; label: string; type: string }[];
 }
 
