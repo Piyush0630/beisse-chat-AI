@@ -46,24 +46,24 @@ export default function PDFViewerPanel() {
   const pageNumber = pdfConfig.pageNumber;
 
   return (
-    <section className="flex h-full flex-col bg-zinc-100 dark:bg-zinc-900">
-      <div className="flex h-12 items-center justify-between border-b bg-white px-4 dark:bg-zinc-950">
-        <div className="flex items-center gap-4">
-          <span className="text-sm font-medium truncate max-w-[200px]">
-            {pdfConfig.filename || "No document selected"}
+    <section className="flex h-full flex-col bg-zinc-100 dark:bg-zinc-900 min-w-0">
+      <div className="flex h-12 items-center justify-between border-b bg-white px-2 dark:bg-zinc-950 gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+          <span className="text-sm font-medium truncate shrink hidden sm:inline">
+            {pdfConfig.filename || "No document"}
           </span>
-          <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded">
-            <button 
+          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-1 rounded shrink-0">
+            <button
               onClick={() => setPageNumber(p => Math.max(1, p - 1))}
               className="p-0.5 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded disabled:opacity-30"
               disabled={pageNumber <= 1}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="text-xs min-w-[60px] text-center">
-              Page {pageNumber} / {numPages || '--'}
+            <span className="text-[10px] sm:text-xs min-w-[50px] text-center">
+              {pageNumber} / {numPages || '--'}
             </span>
-            <button 
+            <button
               onClick={() => setPageNumber(p => Math.min(numPages, p + 1))}
               className="p-0.5 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded disabled:opacity-30"
               disabled={pageNumber >= numPages}
@@ -73,30 +73,34 @@ export default function PDFViewerPanel() {
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setScale(s => Math.max(0.5, s - 0.1))}
-            className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </button>
-          <span className="text-xs w-10 text-center">{Math.round(scale * 100)}%</span>
-          <button 
-            onClick={() => setScale(s => Math.min(2.0, s + 0.1))}
-            className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </button>
-          <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800 mx-1" />
+        <div className="flex items-center gap-1 shrink-0">
+          <div className="hidden xs:flex items-center gap-1">
+            <button
+              onClick={() => setScale(s => Math.max(0.5, s - 0.1))}
+              className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded"
+            >
+              <ZoomOut className="h-3.5 w-3.5" />
+            </button>
+            <span className="text-[10px] w-8 text-center">{Math.round(scale * 100)}%</span>
+            <button
+              onClick={() => setScale(s => Math.min(2.0, s + 0.1))}
+              className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded"
+            >
+              <ZoomIn className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          
+          <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800 mx-0.5" />
+          
           <div className="flex items-center">
-            {showSearch && (
+            {showSearch && containerWidth > 400 && (
               <input
                 autoFocus
                 type="text"
-                placeholder="Find in PDF..."
+                placeholder="Find..."
                 value={pdfSearchTerm}
                 onChange={(e) => setPdfSearchTerm(e.target.value)}
-                className="w-32 rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-800 dark:bg-zinc-950 mr-2"
+                className="w-20 sm:w-28 rounded-md border border-zinc-200 bg-white px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-800 dark:bg-zinc-950 mr-1"
               />
             )}
             <button
@@ -109,8 +113,8 @@ export default function PDFViewerPanel() {
           </div>
           <button
             onClick={() => setPdfConfig({ fileUrl: null, filename: null, highlights: [] })}
-            className="p-1.5 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 rounded ml-1"
-            title="Close Manual"
+            className="p-1.5 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 rounded"
+            title="Close"
           >
             <X className="h-4 w-4" />
           </button>
