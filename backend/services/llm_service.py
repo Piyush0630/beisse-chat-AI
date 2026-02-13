@@ -46,8 +46,12 @@ class LLMService:
 
         return f"""
 You are a helpful assistant for Biesse. Use the following context and conversation history to answer the user's question.
-If the context doesn't contain the answer, say you don't know based on the provided documents.
-Always include citations to the context if possible.
+
+Guidelines:
+1. If the user greets you or asks general questions (e.g., "Hi", "How are you?"), respond politely and professionally.
+2. If the user asks a question that can be answered using the provided context, provide a detailed answer with citations.
+3. If the context doesn't contain the answer for a technical question about Biesse machines, say you don't know based on the provided documents.
+4. Always maintain a helpful and professional tone.
 
 {history_text}
 
