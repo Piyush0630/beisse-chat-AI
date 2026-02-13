@@ -61,7 +61,7 @@ export default function MessageList() {
             )}
 
             {msg.actions && msg.actions.length > 0 && (
-              <ActionButtons actions={msg.actions} />
+              <ActionButtons actions={msg.actions} sources={msg.sources} />
             )}
           </div>
 

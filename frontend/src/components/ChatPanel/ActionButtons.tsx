@@ -11,9 +11,15 @@ export interface Action {
 
 interface ActionButtonsProps {
   actions: Action[];
+  sources?: any[];
 }
 
-export default function ActionButtons({ actions }: ActionButtonsProps) {
+import { useChatStore } from "@/lib/store";
+import { API_BASE_URL } from "@/lib/api";
+
+export default function ActionButtons({ actions, sources }: ActionButtonsProps) {
+  const setPdfConfig = useChatStore((state) => state.setPdfConfig);
+
   if (!actions || actions.length === 0) return null;
 
   const getIcon = (type: string) => {
@@ -37,7 +43,17 @@ export default function ActionButtons({ actions }: ActionButtonsProps) {
     } else if (action.id === "download_report") {
        alert("Downloading Report (Simulation)");
     } else if (action.id === "open_manual") {
-       alert("Opening Manual (Simulation)");
+       if (sources && sources.length > 0) {
+         const src = sources[0];
+         setPdfConfig({
+           filename: src.filename,
+           pageNumber: src.page || 1,
+           highlights: src.bbox ? [src.bbox] : [],
+           fileUrl: `${API_BASE_URL}/files/${src.rel_path || src.filename}`
+         });
+       } else {
+         alert("No manual source found for this message.");
+       }
     }
   };
 
