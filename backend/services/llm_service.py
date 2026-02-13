@@ -22,6 +22,21 @@ class LLMService:
         """
         Generates an answer based on the provided query, context, and conversation history.
         """
+        prompt = self._build_prompt(query, context, history)
+        response = self.model.generate_content(prompt)
+        return response.text
+
+    def generate_answer_stream(self, query: str, context: str, history: List[Dict[str, str]] = None):
+        """
+        Generates a streaming answer based on the provided query, context, and conversation history.
+        """
+        prompt = self._build_prompt(query, context, history)
+        response = self.model.generate_content(prompt, stream=True)
+        for chunk in response:
+            if chunk.text:
+                yield chunk.text
+
+    def _build_prompt(self, query: str, context: str, history: List[Dict[str, str]] = None) -> str:
         history_text = ""
         if history:
             history_text = "\nConversation History:\n"
@@ -29,7 +44,7 @@ class LLMService:
                 role = "User" if msg["role"] == "user" else "Assistant"
                 history_text += f"{role}: {msg['content']}\n"
 
-        prompt = f"""
+        return f"""
 You are a helpful assistant for Biesse. Use the following context and conversation history to answer the user's question.
 If the context doesn't contain the answer, say you don't know based on the provided documents.
 Always include citations to the context if possible.
@@ -44,7 +59,5 @@ Question:
 
 Answer:
 """
-        response = self.model.generate_content(prompt)
-        return response.text
 
 llm_service = LLMService()

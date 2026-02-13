@@ -28,6 +28,7 @@ interface ChatState {
   currentConversationId: string | null;
   memoryEnabled: boolean;
   isLoading: boolean;
+  isHistoryLoading: boolean;
   isConnected: boolean;
   attachedFiles: FileItem[];
   pdfConfig: {
@@ -39,10 +40,12 @@ interface ChatState {
   
   setMessages: (messages: Message[]) => void;
   addMessage: (message: Message) => void;
+  updateMessage: (id: string, updates: Partial<Message>) => void;
   setConversations: (conversations: Conversation[]) => void;
   setCurrentConversationId: (id: string | null) => void;
   setMemoryEnabled: (enabled: boolean) => void;
   setLoading: (loading: boolean) => void;
+  setHistoryLoading: (loading: boolean) => void;
   setConnected: (connected: boolean) => void;
   clearMessages: () => void;
   setPdfConfig: (config: Partial<ChatState['pdfConfig']>) => void;
@@ -56,6 +59,7 @@ export const useChatStore = create<ChatState>((set) => ({
   currentConversationId: null,
   memoryEnabled: true,
   isLoading: false,
+  isHistoryLoading: false,
   isConnected: true,
   attachedFiles: [],
   pdfConfig: {
@@ -69,10 +73,14 @@ export const useChatStore = create<ChatState>((set) => ({
   addMessage: (message) => set((state) => ({ 
     messages: [...state.messages, message] 
   })),
+  updateMessage: (id, updates) => set((state) => ({
+    messages: state.messages.map((m) => m.id === id ? { ...m, ...updates } : m)
+  })),
   setConversations: (conversations) => set({ conversations }),
   setCurrentConversationId: (id) => set({ currentConversationId: id }),
   setMemoryEnabled: (enabled) => set({ memoryEnabled: enabled }),
   setLoading: (loading) => set({ isLoading: loading }),
+  setHistoryLoading: (loading) => set({ isHistoryLoading: loading }),
   setConnected: (connected) => set({ isConnected: connected }),
   clearMessages: () => set({ messages: [] }),
   setPdfConfig: (config) => set((state) => ({

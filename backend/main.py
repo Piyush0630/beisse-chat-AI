@@ -1,10 +1,12 @@
 import os
 import shutil
 import uuid
+import json
 from typing import List, Optional
 from fastapi import FastAPI, Depends, UploadFile, File as FastAPIFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from pydantic import BaseModel
@@ -119,6 +121,100 @@ def health_check(db: Session = Depends(get_db)):
         "vector_db": vdb_status,
         "vector_count": count
     }
+
+@app.post("/chat/stream")
+async def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
+    # 1. Get or create conversation
+    if not request.conversation_id:
+        conv = models.Conversation(title=request.query[:50])
+        db.add(conv)
+        db.commit()
+        db.refresh(conv)
+        conversation_id = conv.id
+    else:
+        conversation_id = request.conversation_id
+        conv = db.query(models.Conversation).filter(models.Conversation.id == conversation_id).first()
+        if not conv:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        
+    # 2. Save user message
+    user_msg = models.Message(
+        conversation_id=conversation_id,
+        role="user",
+        content=request.query
+    )
+    db.add(user_msg)
+    
+    conv.updated_at = models.datetime.utcnow()
+    if conv.title == "New Chat" or len(conv.title) < 5:
+        conv.title = request.query[:50]
+        
+    db.commit()
+    
+    # 3. Fetch history
+    history = []
+    if conv.memory_enabled:
+        past_messages = db.query(models.Message)\
+            .filter(models.Message.conversation_id == conversation_id)\
+            .filter(models.Message.id != user_msg.id)\
+            .order_by(models.Message.timestamp.desc())\
+            .limit(5)\
+            .all()
+        for msg in reversed(past_messages):
+            history.append({"role": msg.role, "content": msg.content})
+    
+    # 4. Additional context
+    additional_context = ""
+    files = db.query(models.File).filter(
+        models.File.conversation_id == conversation_id,
+        models.File.processed == False
+    ).all()
+    
+    for file in files:
+        if file.filename.endswith(('.txt', '.csv', '.md')):
+            try:
+                if os.path.exists(file.filepath):
+                    with open(file.filepath, 'r', encoding='utf-8') as f:
+                        additional_context += f"\n---\nFile: {file.filename}\nContent:\n{f.read()}\n"
+            except Exception as e:
+                print(f"Error reading file {file.filename}: {e}")
+
+    def stream_generator():
+        full_answer = ""
+        sources = []
+        
+        for chunk_str in rag_pipeline.query_stream(request.query, history=history, additional_context=additional_context):
+            chunk_data = json.loads(chunk_str)
+            if chunk_data["type"] == "metadata":
+                sources = chunk_data["sources"]
+                chunk_data["conversation_id"] = conversation_id
+                yield json.dumps(chunk_data) + "\n"
+            elif chunk_data["type"] == "content":
+                full_answer += chunk_data["content"]
+                yield chunk_str
+        
+        # After stream ends, detect actions and save message
+        actions = action_detector.detect_actions(full_answer)
+        assistant_msg = models.Message(
+            conversation_id=conversation_id,
+            role="assistant",
+            content=full_answer,
+            sources=sources,
+            actions=actions
+        )
+        try:
+            db.add(assistant_msg)
+            db.commit()
+            yield json.dumps({
+                "type": "final", 
+                "message_id": assistant_msg.id,
+                "actions": actions
+            }) + "\n"
+        except Exception as e:
+            print(f"Error saving assistant message: {e}")
+            db.rollback()
+
+    return StreamingResponse(stream_generator(), media_type="application/x-ndjson")
 
 @app.post("/chat")
 async def chat(request: ChatRequest, db: Session = Depends(get_db)):

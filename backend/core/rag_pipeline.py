@@ -54,6 +54,30 @@ class RAGPipeline:
         """
         Retrieves relevant document chunks and generates an answer using context and history.
         """
+        context, sources = self._retrieve_context(question, n_results, additional_context)
+        
+        # 4. Generate answer using LLM (with history)
+        answer = llm_service.generate_answer(question, context, history)
+        
+        return {
+            "answer": answer,
+            "sources": sources
+        }
+
+    def query_stream(self, question: str, n_results: int = 5, history: List[Dict[str, str]] = None, additional_context: str = ""):
+        """
+        Retrieves relevant document chunks and generates a streaming answer.
+        """
+        context, sources = self._retrieve_context(question, n_results, additional_context)
+        
+        # Yield metadata first (sources)
+        yield json.dumps({"type": "metadata", "sources": sources}) + "\n"
+        
+        # Generate answer using LLM stream
+        for chunk in llm_service.generate_answer_stream(question, context, history):
+            yield json.dumps({"type": "content", "content": chunk}) + "\n"
+
+    def _retrieve_context(self, question: str, n_results: int = 5, additional_context: str = ""):
         # 1. Embed the query
         query_embedding = embedding_service.get_embedding(question)
         
@@ -83,12 +107,6 @@ class RAGPipeline:
         if additional_context:
             context += f"\n\nAdditional File Context:\n{additional_context}"
         
-        # 4. Generate answer using LLM (with history)
-        answer = llm_service.generate_answer(question, context, history)
-        
-        return {
-            "answer": answer,
-            "sources": sources
-        }
+        return context, sources
 
 rag_pipeline = RAGPipeline()

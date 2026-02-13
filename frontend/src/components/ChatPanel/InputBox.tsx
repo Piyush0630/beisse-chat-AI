@@ -7,7 +7,15 @@ import { chatApi } from "@/lib/api";
 
 export default function InputBox() {
   const [input, setInput] = React.useState("");
-  const { addMessage, isLoading, setLoading, currentConversationId, setCurrentConversationId, setConversations } = useChatStore();
+  const { 
+    addMessage, 
+    updateMessage,
+    isLoading, 
+    setLoading, 
+    currentConversationId, 
+    setCurrentConversationId, 
+    setConversations 
+  } = useChatStore();
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -23,33 +31,50 @@ export default function InputBox() {
     setInput("");
     setLoading(true);
 
+    const assistantMsgId = (Date.now() + 1).toString();
+    // Pre-add empty assistant message
+    addMessage({
+      id: assistantMsgId,
+      role: 'assistant' as const,
+      content: "",
+    });
+
+    let fullContent = "";
+
     try {
-      const response = await chatApi.sendMessage(query, currentConversationId || undefined);
-      
-      // If it was a new conversation, update the current id and refresh the sidebar
-      if (!currentConversationId && response.conversation_id) {
-        setCurrentConversationId(response.conversation_id);
-        const convs = await chatApi.getConversations();
-        setConversations(convs);
-      }
-
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant' as const,
-        content: response.answer,
-        sources: response.sources?.map((s: any) => ({
-          page: s.page,
-          filename: s.filename,
-          bbox: s.bbox
-        }))
-      };
-
-      addMessage(assistantMessage);
+      await chatApi.streamMessage(query, currentConversationId, async (data) => {
+        if (data.type === 'metadata') {
+          // If it was a new conversation, update the current id and refresh the sidebar
+          if (!currentConversationId && data.conversation_id) {
+            setCurrentConversationId(data.conversation_id);
+            const convs = await chatApi.getConversations();
+            setConversations(convs);
+          }
+          
+          if (data.sources) {
+            updateMessage(assistantMsgId, {
+              sources: data.sources.map((s: any) => ({
+                page: s.page,
+                filename: s.filename,
+                bbox: s.bbox
+              }))
+            });
+          }
+        } else if (data.type === 'content') {
+          fullContent += data.content;
+          updateMessage(assistantMsgId, { content: fullContent });
+        } else if (data.type === 'final') {
+          if (data.actions) {
+            updateMessage(assistantMsgId, { actions: data.actions });
+          }
+          if (data.message_id) {
+            updateMessage(assistantMsgId, { id: data.message_id });
+          }
+        }
+      });
     } catch (error) {
       console.error("Failed to send message:", error);
-      addMessage({
-        id: (Date.now() + 1).toString(),
-        role: 'assistant' as const,
+      updateMessage(assistantMsgId, {
         content: "Sorry, I encountered an error. Please try again.",
       });
     } finally {

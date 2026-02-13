@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { User, Bot, FileText } from "lucide-react";
 import { useChatStore } from "@/lib/store";
 import ActionButtons from "./ActionButtons";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function MessageList() {
   const messages = useChatStore((state) => state.messages);
@@ -48,7 +49,7 @@ export default function MessageList() {
                       filename: src.filename,
                       pageNumber: src.page,
                       highlights: src.bbox ? [src.bbox] : [],
-                      fileUrl: `http://localhost:8001/files/${src.filename}`
+                      fileUrl: `${API_BASE_URL}/files/${src.filename}`
                     })}
                     className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
                   >

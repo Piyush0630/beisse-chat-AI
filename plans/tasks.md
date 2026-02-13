@@ -149,13 +149,13 @@ This plan breaks down the development of the Enhanced Biesse Chat Assistant into
 ## Phase 7: Final Polish & Testing
 **Goal:** Ensure a smooth user experience.
 
-- [ ] **7.1 UI Polish**
-    - [ ] Add Loading Skeletons for chat history.
-    - [ ] Add Streaming support for AI responses (optional, if time permits).
-    - [ ] Ensure consistent styling (Tailwind).
+- [✓] **7.1 UI Polish**
+    - [✓] Add Loading Skeletons for chat history.
+    - [✓] Add Streaming support for AI responses.
+    - [✓] Ensure consistent styling (Tailwind).
 
-- [ ] **7.2 Testing**
-    - [ ] Test complete flow: New Chat -> Upload PDF -> Query -> Check History.
-    - [ ] Test Memory Toggle (On/Off).
-    - [ ] Test Disconnect (Stop backend -> Check UI).
+- [✓] **7.2 Testing**
+    - [✓] Test complete flow: New Chat -> Upload PDF -> Query -> Check History.
+    - [✓] Test Memory Toggle (On/Off).
+    - [✓] Test Disconnect (Stop backend -> Check UI).
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useChatStore } from './store';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -29,6 +29,48 @@ export const chatApi = {
       conversation_id: conversationId,
     });
     return response.data;
+  },
+  streamMessage: async (query: string, conversationId: string | null, onChunk: (data: any) => void) => {
+    const response = await fetch(`${API_BASE_URL}/chat/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        conversation_id: conversationId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to stream message');
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) return;
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.trim()) {
+          try {
+            const data = JSON.parse(line);
+            onChunk(data);
+          } catch (e) {
+            console.error('Error parsing stream chunk', e);
+          }
+        }
+      }
+    }
   },
   getConversations: async () => {
     const response = await api.get('/conversations');
