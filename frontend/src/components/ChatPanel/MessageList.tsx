@@ -5,9 +5,11 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { User, Bot, FileText } from "lucide-react";
 import { useChatStore } from "@/lib/store";
+import ActionButtons from "./ActionButtons";
 
 export default function MessageList() {
   const messages = useChatStore((state) => state.messages);
+  const setPdfConfig = useChatStore((state) => state.setPdfConfig);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -40,12 +42,25 @@ export default function MessageList() {
             {msg.sources && msg.sources.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2 border-t pt-2 border-zinc-200 dark:border-zinc-700">
                 {msg.sources.map((src, i) => (
-                  <button key={i} className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                  <button
+                    key={i}
+                    onClick={() => setPdfConfig({
+                      filename: src.filename,
+                      pageNumber: src.page,
+                      highlights: src.bbox ? [src.bbox] : [],
+                      fileUrl: `http://localhost:8001/files/${src.filename}`
+                    })}
+                    className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                  >
                     <FileText className="h-3 w-3" />
                     Page {src.page}
                   </button>
                 ))}
               </div>
+            )}
+
+            {msg.actions && msg.actions.length > 0 && (
+              <ActionButtons actions={msg.actions} />
             )}
           </div>
 

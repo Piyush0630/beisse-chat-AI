@@ -4,6 +4,7 @@ import uuid
 from typing import List, Optional
 from fastapi import FastAPI, Depends, UploadFile, File as FastAPIFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from pydantic import BaseModel
@@ -12,6 +13,7 @@ from .database import get_db, engine
 from . import models
 from .services.vector_service import vector_service
 from .core.rag_pipeline import rag_pipeline
+from .core.action_detector import action_detector
 from .config import settings
 
 # Initialize tables
@@ -27,6 +29,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve uploaded files
+if not os.path.exists(settings.UPLOAD_DIR):
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+app.mount("/files", StaticFiles(directory=settings.UPLOAD_DIR), name="files")
 
 class ChatRequest(BaseModel):
     query: str
@@ -219,12 +226,16 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
         print(f"Error in RAG pipeline: {e}")
         raise HTTPException(status_code=500, detail=f"Error in RAG pipeline: {str(e)}")
         
+    # 4.5 Detect actions
+    actions = action_detector.detect_actions(result["answer"])
+
     # 5. Save assistant message
     assistant_msg = models.Message(
         conversation_id=conversation_id,
         role="assistant",
         content=result["answer"],
-        sources=result["sources"]
+        sources=result["sources"],
+        actions=actions
     )
     db.add(assistant_msg)
     db.commit()
@@ -232,6 +243,7 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     return {
         "answer": result["answer"],
         "sources": result["sources"],
+        "actions": actions,
         "conversation_id": conversation_id,
         "message_id": assistant_msg.id
     }

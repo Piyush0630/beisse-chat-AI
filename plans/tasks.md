@@ -103,25 +103,25 @@ This plan breaks down the development of the Enhanced Biesse Chat Assistant into
 ## Phase 5: V2 Feature - Actions & Interactive Citations
 **Goal:** Make the chat actionable and the PDF viewer interactive.
 
-- [ ] **5.1 Backend Action Detection**
-    - [ ] Create `core/action_detector.py`.
-    - [ ] Implement rule-based logic (Regex/Keywords) to detect:
-        - [ ] "Dashboard" -> `view_dashboard`.
-        - [ ] "Page X" -> `open_pdf`.
-    - [ ] Update `POST /chat` response to include `actions` list.
+- [x] **5.1 Backend Action Detection**
+    - [x] Create `core/action_detector.py`.
+    - [x] Implement rule-based logic (Regex/Keywords) to detect:
+        - [x] "Dashboard" -> `view_dashboard`.
+        - [x] "Page X" -> `open_pdf`.
+    - [x] Update `POST /chat` response to include `actions` list.
 
-- [ ] **5.2 Frontend Action Buttons**
-    - [ ] Create `components/ChatPanel/ActionButtons.tsx`.
-    - [ ] Render buttons below AI message.
-    - [ ] Implement click handlers (e.g., console log or toast for now).
+- [x] **5.2 Frontend Action Buttons**
+    - [x] Create `components/ChatPanel/ActionButtons.tsx`.
+    - [x] Render buttons below AI message.
+    - [x] Implement click handlers (e.g., console log or toast for now).
 
-- [ ] **5.3 Interactive Citations**
-    - [ ] Update `AIMessage` component to render citations as clickable links.
-    - [ ] Implement `components/PDFViewer/HighlightOverlay.tsx`.
-    - [ ] Handle citation click:
-        - [ ] Load relevant PDF.
-        - [ ] Scroll to Page.
-        - [ ] Draw Bounding Box (Highlight).
+- [x] **5.3 Interactive Citations**
+    - [x] Update `AIMessage` component to render citations as clickable links.
+    - [x] Implement `components/PDFViewer/HighlightOverlay.tsx`.
+    - [x] Handle citation click:
+        - [x] Load relevant PDF.
+        - [x] Scroll to Page.
+        - [x] Draw Bounding Box (Highlight).
 
 ---
 
