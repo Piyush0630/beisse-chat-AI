@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Maximize2, Minimize2, Search, ZoomIn, ZoomOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { Maximize2, Minimize2, Search, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -17,6 +17,22 @@ export default function PDFViewerPanel() {
   
   const [numPages, setNumPages] = React.useState<number>(0);
   const [scale, setScale] = React.useState<number>(1.0);
+  const [showSearch, setShowSearch] = React.useState(false);
+  const [pdfSearchTerm, setPdfSearchTerm] = React.useState("");
+  const [containerWidth, setContainerWidth] = React.useState<number>(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (containerRef.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setContainerWidth(entry.contentRect.width);
+        }
+      });
+      resizeObserver.observe(containerRef.current);
+      return () => resizeObserver.disconnect();
+    }
+  }, []);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
@@ -72,32 +88,66 @@ export default function PDFViewerPanel() {
             <ZoomIn className="h-4 w-4" />
           </button>
           <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800 mx-1" />
-          <button className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded">
-            <Search className="h-4 w-4" />
+          <div className="flex items-center">
+            {showSearch && (
+              <input
+                autoFocus
+                type="text"
+                placeholder="Find in PDF..."
+                value={pdfSearchTerm}
+                onChange={(e) => setPdfSearchTerm(e.target.value)}
+                className="w-32 rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-800 dark:bg-zinc-950 mr-2"
+              />
+            )}
+            <button
+              onClick={() => setShowSearch(!showSearch)}
+              className={`p-1.5 rounded transition-colors ${showSearch ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+              title="Search in PDF"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          </div>
+          <button
+            onClick={() => setPdfConfig({ fileUrl: null, filename: null, highlights: [] })}
+            className="p-1.5 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 rounded ml-1"
+            title="Close Manual"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
       </div>
       
-      <div className="flex-1 overflow-auto p-8 flex justify-center bg-zinc-200 dark:bg-zinc-900">
-        <div className="shadow-2xl">
-          <Document
-            file={pdfConfig.fileUrl}
-            onLoadSuccess={onDocumentLoadSuccess}
-            loading={
-              <div className="h-[842px] w-[595px] bg-white dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
-                Loading PDF...
-              </div>
-            }
-            noData={
-              <div className="h-[842px] w-[595px] bg-white dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
-                Select a citation to load PDF
-              </div>
-            }
-          >
-            {numPages > 0 && (
-              <div className="relative">
-                <Page
-                  pageNumber={pageNumber}
+      <div
+        ref={containerRef}
+        className="flex-1 overflow-auto bg-zinc-200 dark:bg-zinc-900"
+      >
+        <div className="min-h-full p-8 flex justify-center items-start">
+          <div className="shadow-2xl bg-white dark:bg-zinc-800">
+            <Document
+              file={pdfConfig.fileUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              loading={
+                <div
+                  style={{ width: containerWidth > 100 ? containerWidth - 64 : 595 }}
+                  className="h-[842px] flex items-center justify-center text-zinc-400"
+                >
+                  Loading PDF...
+                </div>
+              }
+              noData={
+                <div
+                  style={{ width: containerWidth > 100 ? containerWidth - 64 : 595 }}
+                  className="h-[842px] flex items-center justify-center text-zinc-400"
+                >
+                  Select a citation to load PDF
+                </div>
+              }
+            >
+              {numPages > 0 && (
+                <div className="relative">
+                  <Page
+                    pageNumber={pageNumber}
+                    width={containerWidth > 100 ? containerWidth - 100 : undefined}
                   scale={scale}
                   renderAnnotationLayer={true}
                   renderTextLayer={true}
@@ -119,6 +169,7 @@ export default function PDFViewerPanel() {
           </Document>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useChatStore } from "@/lib/store";
 import { chatApi } from "@/lib/api";
-import { MessageSquare, Plus, Trash2 } from "lucide-react";
+import { MessageSquare, Plus, Trash2, Search } from "lucide-react";
 
 export default function HistorySidebar() {
-  const { 
+  const [searchTerm, setSearchTerm] = useState("");
+  const {
     conversations, 
     setConversations, 
     currentConversationId, 
@@ -89,14 +90,25 @@ export default function HistorySidebar() {
 
   return (
     <aside className="w-full h-full border-r bg-zinc-50 dark:bg-zinc-900/50 flex flex-col overflow-hidden">
-      <div className="p-4 border-b">
-        <button 
+      <div className="p-4 border-b space-y-3">
+        <button
           onClick={handleNewChat}
           className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
         >
           <Plus className="h-4 w-4" />
           New Chat
         </button>
+
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-400" />
+          <input
+            type="text"
+            placeholder="Search chats..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full rounded-md border border-zinc-200 bg-white pl-9 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-800 dark:bg-zinc-950"
+          />
+        </div>
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -116,7 +128,9 @@ export default function HistorySidebar() {
             ) : conversations.length === 0 ? (
               <p className="text-sm text-zinc-500 italic px-3">No conversations yet</p>
             ) : (
-              conversations.map((conv) => (
+              conversations
+                .filter(conv => conv.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                .map((conv) => (
                 <div
                   key={conv.id}
                   onClick={() => handleSelectConversation(conv.id)}
