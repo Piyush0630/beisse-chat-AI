@@ -3,3 +3,5 @@ backend/venv/
 node_modules/
 .env
 __pycache__/
+data/
+*.pyc

@@ -29,22 +29,22 @@ This plan breaks down the development of the Enhanced Biesse Chat Assistant into
 ## Phase 2: Core Logic & API Development
 **Goal:** Implement the intelligence layer (PDF processing, RAG) and exposure endpoints.
 
-- [ ] **2.1 PDF Processing Pipeline**
-    - [ ] Implement `pdf_processor.py` using PyMuPDF.
-    - [ ] Function: `extract_text_and_bbox(pdf_path)`.
-    - [ ] Function: `chunk_text(text_blocks)`.
+- [✓] **2.1 PDF Processing Pipeline**
+    - [✓] Implement `pdf_processor.py` using PyMuPDF.
+    - [✓] Function: `extract_text_and_bbox(pdf_path)`.
+    - [✓] Function: `chunk_text(text_blocks)`.
 
-- [ ] **2.2 RAG Pipeline Implementation**
-    - [ ] Implement `services/llm_service.py` (Gemini Client).
-    - [ ] Implement `services/embedding_service.py` (Google Embeddings).
-    - [ ] Implement `core/rag_pipeline.py`:
-        - [ ] `ingest_document(file)` -> Chunk -> Embed -> Store.
-        - [ ] `query(question)` -> Retrieve -> Generate Answer.
+- [✓] **2.2 RAG Pipeline Implementation**
+    - [✓] Implement `services/llm_service.py` (Gemini Client).
+    - [✓] Implement `services/embedding_service.py` (Google Embeddings).
+    - [✓] Implement `core/rag_pipeline.py`:
+        - [✓] `ingest_document(file)` -> Chunk -> Embed -> Store.
+        - [✓] `query(question)` -> Retrieve -> Generate Answer.
 
-- [ ] **2.3 Core API Endpoints**
-    - [ ] `GET /health` (Check DB & Vector DB connection).
-    - [ ] `POST /chat` (Basic QA loop).
-    - [ ] `POST /upload` (Document ingestion).
+- [✓] **2.3 Core API Endpoints**
+    - [✓] `GET /health` (Check DB & Vector DB connection).
+    - [✓] `POST /chat` (Basic QA loop).
+    - [✓] `POST /upload` (Document ingestion).
 
 ---
 
