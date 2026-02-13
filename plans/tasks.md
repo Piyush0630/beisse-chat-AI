@@ -51,25 +51,25 @@ This plan breaks down the development of the Enhanced Biesse Chat Assistant into
 ## Phase 3: Core Frontend & Chat Interface (Shell)
 **Goal:** Build the user interface and connect it to the backend.
 
-- [ ] **3.1 Frontend Setup**
-    - [ ] Initialize `frontend/` (Next.js 14, TypeScript, Tailwind).
-    - [ ] Install dependencies: `zustand`, `lucide-react`, `axios`, `react-markdown`, `react-pdf`.
-    - [ ] Configure Tailwind & Global Styles.
+- [✓] **3.1 Frontend Setup**
+    - [✓] Initialize `frontend/` (Next.js 14, TypeScript, Tailwind).
+    - [✓] Install dependencies: `zustand`, `lucide-react`, `axios`, `react-markdown`, `react-pdf`.
+    - [✓] Configure Tailwind & Global Styles.
 
-- [ ] **3.2 Layout Implementation**
-    - [ ] Create `components/Layout/MainContent.tsx` (Three-Panel Grid).
-    - [ ] Create `components/Layout/Header.tsx`.
-    - [ ] Create placeholder Sidebar & PDF Panel.
+- [✓] **3.2 Layout Implementation**
+    - [✓] Create `components/Layout/MainContent.tsx` (Three-Panel Grid).
+    - [✓] Create `components/Layout/Header.tsx`.
+    - [✓] Create placeholder Sidebar & PDF Panel.
 
-- [ ] **3.3 Chat Interface**
-    - [ ] Create `components/ChatPanel/MessageList.tsx`.
-    - [ ] Create `components/ChatPanel/InputBox.tsx`.
-    - [ ] Create `lib/store.ts` (Zustand) for managing chat messages.
-    - [ ] Implement `API.postMessage` integration with backend.
+- [✓] **3.3 Chat Interface**
+    - [✓] Create `components/ChatPanel/MessageList.tsx`.
+    - [✓] Create `components/ChatPanel/InputBox.tsx`.
+    - [✓] Create `lib/store.ts` (Zustand) for managing chat messages.
+    - [✓] Implement `API.postMessage` integration with backend.
 
-- [ ] **3.4 PDF Viewer Integration**
-    - [ ] Create `components/PDFViewer/PDFRenderer.tsx` using `react-pdf`.
-    - [ ] Implement basic PDF loading from URL/File.
+- [✓] **3.4 PDF Viewer Integration**
+    - [✓] Create `components/PDFViewer/PDFRenderer.tsx` using `react-pdf`.
+    - [✓] Implement basic PDF loading from URL/File.
 
 ---
 

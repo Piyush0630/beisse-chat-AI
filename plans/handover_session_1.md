@@ -59,11 +59,35 @@
 3. **Chat Interface:** Build message list and input box with API integration.
 4. **PDF Viewer:** Integrate `react-pdf` for document visualization.
 
-## Technical Context for Next Session
-- **Python Version:** 3.12
-- **Backend Port:** 8001
-- **API Documentation:** Available at `http://localhost:8001/docs` (Swagger).
-- **Key Files:**
-    - `backend/core/rag_pipeline.py`: Heart of the retrieval-augmented generation.
-    - `backend/main.py`: Entry point with chat and upload logic.
-    - `backend/core/pdf_processor.py`: PDF extraction logic.
+## Accomplished in Session 3 (Phase 3)
+### 1. Frontend Environment Setup
+- Initialized Next.js 14 project with TypeScript and Tailwind CSS in `frontend/`.
+- Installed core dependencies: `zustand`, `lucide-react`, `axios`, `react-markdown`, `react-pdf`.
+
+### 2. Layout & Components
+- Implemented three-panel responsive layout (History Sidebar 20%, Chat Panel 30%, PDF Viewer 50%).
+- Created `Header` component with connection status indicator.
+- Created `HistorySidebar` with "New Chat" button and placeholder list.
+
+### 3. Chat Interface
+- Implemented `ChatPanel` with "Memory Mode" toggle.
+- Created `MessageList` with markdown support and source citation display.
+- Created `InputBox` with multi-line support and enter-to-send functionality.
+
+### 4. State Management & API
+- Set up `zustand` store (`useChatStore`) for managing message history and loading states.
+- Implemented `chatApi` for communicating with the FastAPI backend.
+- Integrated chat flow: User Input -> UI Update -> API Call -> Assistant Response -> UI Update.
+
+### 5. PDF Viewer
+- Integrated `react-pdf` for document visualization.
+- Implemented basic navigation (Prev/Next page) and zoom controls.
+
+## Current State of the Project
+- Backend (Phase 1-2) and Frontend (Phase 3) core shells are fully functional.
+- The application now supports a full end-to-end loop: Query -> RAG -> Response -> UI Display.
+
+## Next Steps (Phase 4)
+1. **Backend History Logic:** Update `POST /chat` to persist messages and implement conversation retrieval endpoints.
+2. **Memory Control:** Implement logic to fetch previous context based on the memory toggle.
+3. **Frontend History:** Connect the sidebar to the real conversation history API.
