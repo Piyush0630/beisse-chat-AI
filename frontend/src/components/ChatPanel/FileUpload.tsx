@@ -16,6 +16,7 @@ export default function FileUpload() {
 
     setIsUploading(true);
     try {
+      let uploadedCount = 0;
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const response = await chatApi.uploadFile(currentConversationId, file);
@@ -25,6 +26,10 @@ export default function FileUpload() {
           processed: response.chunks_ingested > 0,
           file_type: response.filename.split('.').pop()
         });
+        uploadedCount++;
+      }
+      if (uploadedCount > 0) {
+        alert("PDF has been uploaded successfully");
       }
     } catch (error) {
       console.error("Upload failed:", error);

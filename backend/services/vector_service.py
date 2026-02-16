@@ -14,4 +14,10 @@ class VectorService:
     def get_collection(self):
         return self.collection
 
+    def delete_by_filename(self, filename: str):
+        """
+        Deletes all vectors associated with a specific filename.
+        """
+        self.collection.delete(where={"filename": filename})
+
 vector_service = VectorService()

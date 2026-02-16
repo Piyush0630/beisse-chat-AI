@@ -45,12 +45,18 @@ export default function MessageList() {
                 {msg.sources.map((src, i) => (
                   <button
                     key={i}
-                    onClick={() => setPdfConfig({
-                      filename: src.filename,
-                      pageNumber: src.page,
-                      highlights: src.bbox ? [src.bbox] : [],
-                      fileUrl: `${API_BASE_URL}/files/${src.rel_path || src.filename}`
-                    })}
+                    onClick={() => {
+                      // Use the unified PDF viewer endpoint
+                      const filename = src.rel_path || src.filename;
+                      const fileUrl = `${API_BASE_URL}/pdf-viewer/${encodeURIComponent(filename)}`;
+                        
+                      setPdfConfig({
+                        filename: src.filename,
+                        pageNumber: src.page,
+                        highlights: src.bbox ? [src.bbox] : [],
+                        fileUrl: fileUrl
+                      });
+                    }}
                     className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     <FileText className="h-3 w-3" />

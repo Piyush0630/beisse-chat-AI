@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     
     # Storage
     UPLOAD_DIR: str = os.path.join(PROJECT_ROOT, "data", "uploads")
+    PDF_DIR: str = os.path.join(PROJECT_ROOT, "data", "pdfs")
     
     # App Settings
     DEBUG: bool = True
@@ -34,3 +35,4 @@ settings = Settings()
 os.makedirs(os.path.dirname(settings.DATABASE_URL.replace("sqlite:///./", "./")), exist_ok=True)
 os.makedirs(settings.CHROMA_DB_PATH, exist_ok=True)
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+os.makedirs(settings.PDF_DIR, exist_ok=True)

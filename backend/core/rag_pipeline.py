@@ -14,9 +14,15 @@ class RAGPipeline:
         """
         import os
         from backend.config import settings
-        rel_path = os.path.relpath(file_path, settings.UPLOAD_DIR).replace('\\', '/')
+        # 1. Determine base directory for rel_path
+        if file_path.startswith(settings.UPLOAD_DIR):
+            base_dir = settings.UPLOAD_DIR
+        else:
+            base_dir = settings.PDF_DIR
+            
+        rel_path = os.path.relpath(file_path, base_dir).replace('\\', '/')
         
-        # 1. Extract text and bounding boxes
+        # 2. Extract text and bounding boxes
         blocks = extract_text_and_bbox(file_path)
         
         # 2. Chunk text
@@ -59,6 +65,18 @@ class RAGPipeline:
         """
         Retrieves relevant document chunks and generates an answer using context and history.
         """
+        # Simple check for greetings to avoid unnecessary RAG search
+        greetings = ["hi", "hello", "hey", "greetings", "good morning", "good afternoon", "good evening", "how are you"]
+        clean_question = question.lower().strip().rstrip('?!.')
+        is_greeting = any(clean_question == g or clean_question.startswith(g + " ") for g in greetings)
+        
+        if is_greeting:
+            answer = llm_service.generate_answer(question, "", history)
+            return {
+                "answer": answer,
+                "sources": []
+            }
+
         context, sources = self._retrieve_context(question, n_results, additional_context)
         
         # 4. Generate answer using LLM (with history)
@@ -73,6 +91,17 @@ class RAGPipeline:
         """
         Retrieves relevant document chunks and generates a streaming answer.
         """
+        # Simple check for greetings to avoid unnecessary RAG search
+        greetings = ["hi", "hello", "hey", "greetings", "good morning", "good afternoon", "good evening", "how are you"]
+        clean_question = question.lower().strip().rstrip('?!.')
+        is_greeting = any(clean_question == g or clean_question.startswith(g + " ") for g in greetings)
+        
+        if is_greeting:
+            yield json.dumps({"type": "metadata", "sources": []}) + "\n"
+            for chunk in llm_service.generate_answer_stream(question, "", history):
+                yield json.dumps({"type": "content", "content": chunk}) + "\n"
+            return
+
         context, sources = self._retrieve_context(question, n_results, additional_context)
         
         # Yield metadata first (sources)

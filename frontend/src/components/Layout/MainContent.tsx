@@ -50,7 +50,7 @@ export default function MainContent() {
   }, []);
 
   return (
-    <div className="flex flex-1 overflow-hidden select-none">
+    <div className="flex flex-1 overflow-hidden">
       {/* Sidebar */}
       <div style={{ width: `${sidebarWidth}%` }} className="min-w-[200px] max-w-[400px]">
         <HistorySidebar />

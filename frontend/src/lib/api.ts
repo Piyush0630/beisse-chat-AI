@@ -112,4 +112,39 @@ export const chatApi = {
   },
 };
 
+export const pdfApi = {
+  uploadPdf: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/pdf/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+  listPdfs: async () => {
+    const response = await api.get('/pdf/list');
+    return response.data;
+  },
+  deletePdf: async (id: string) => {
+    const response = await api.delete(`/pdf/${id}`);
+    return response.data;
+  },
+  replacePdf: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.put(`/pdf/${id}/replace`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+  reembedPdf: async (id: string) => {
+    const response = await api.post(`/pdf/${id}/reembed`);
+    return response.data;
+  },
+};
+
 export default api;

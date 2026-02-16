@@ -6,7 +6,7 @@ from typing import List, Optional
 from fastapi import FastAPI, Depends, UploadFile, File as FastAPIFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from pydantic import BaseModel
@@ -18,6 +18,7 @@ from .core.rag_pipeline import rag_pipeline
 from .core.action_detector import action_detector
 from .config import settings
 from .api.files import router as files_router
+from .api.pdf import router as pdf_router
 
 # Initialize tables
 models.Base.metadata.create_all(bind=engine)
@@ -38,7 +39,51 @@ if not os.path.exists(settings.UPLOAD_DIR):
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/files", StaticFiles(directory=settings.UPLOAD_DIR), name="files")
 
+# Serve PDF files
+if not os.path.exists(settings.PDF_DIR):
+    os.makedirs(settings.PDF_DIR, exist_ok=True)
+app.mount("/pdf-files", StaticFiles(directory=settings.PDF_DIR), name="pdf-files")
+
 app.include_router(files_router)
+app.include_router(pdf_router)
+
+@app.get("/pdf-viewer/{filename:path}")
+async def serve_pdf(filename: str, db: Session = Depends(get_db)):
+    """
+    Unified PDF server that checks the database mapping first, 
+    then fallbacks to physical directory scanning.
+    """
+    # 1. Check database for filename mapping (matches original filename or ID)
+    # We check filename, rel_path or id
+    file_id_attempt = os.path.splitext(filename)[0]
+    db_file = db.query(models.File).filter(
+        (models.File.filename == filename) | 
+        (models.File.id == file_id_attempt) |
+        (models.File.id == filename)
+    ).first()
+    
+    if db_file and os.path.exists(db_file.filepath):
+        return FileResponse(db_file.filepath)
+
+    # 2. Try PDF_DIR first (direct physical match)
+    pdf_path = os.path.join(settings.PDF_DIR, filename)
+    if os.path.exists(pdf_path):
+        return FileResponse(pdf_path)
+    
+    # 3. Try UPLOAD_DIR root
+    upload_path = os.path.join(settings.UPLOAD_DIR, filename)
+    if os.path.exists(upload_path):
+        return FileResponse(upload_path)
+        
+    raise HTTPException(status_code=404, detail=f"File not found: {filename}")
+    
+    # 4. Recursive search in UPLOAD_DIR (last resort)
+    base_filename = os.path.basename(filename)
+    for root, dirs, files in os.walk(settings.UPLOAD_DIR):
+        if base_filename in files:
+            return FileResponse(os.path.join(root, base_filename))
+            
+    raise HTTPException(status_code=404, detail=f"PDF file {filename} not found")
 
 class ChatRequest(BaseModel):
     query: str

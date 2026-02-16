@@ -9,6 +9,10 @@ def extract_text_and_bbox(pdf_path: str) -> List[Dict[str, Any]]:
     text_blocks = []
     
     for page_num, page in enumerate(doc):
+        # Get page dimensions
+        page_width = page.rect.width
+        page_height = page.rect.height
+        
         # get_text("blocks") returns a list of tuples:
         # (x0, y0, x1, y1, "text", block_no, block_type)
         blocks = page.get_text("blocks")
@@ -21,7 +25,13 @@ def extract_text_and_bbox(pdf_path: str) -> List[Dict[str, Any]]:
                         "x": b[0],
                         "y": b[1],
                         "width": b[2] - b[0],
-                        "height": b[3] - b[1]
+                        "height": b[3] - b[1],
+                        "page_width": page_width,
+                        "page_height": page_height,
+                        "x_norm": b[0] / page_width if page_width > 0 else 0,
+                        "y_norm": b[1] / page_height if page_height > 0 else 0,
+                        "w_norm": (b[2] - b[0]) / page_width if page_width > 0 else 0,
+                        "h_norm": (b[3] - b[1]) / page_height if page_height > 0 else 0
                     },
                     "page": page_num + 1,
                     "block_type": b[6]
