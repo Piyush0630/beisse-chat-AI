@@ -1,7 +1,7 @@
 # Biesse Chat Assistant - MVP Architecture (Enhanced V2)
 
-**Version:** 2.3 (Local MVP + Detailed Flows + Enhanced UI Tree)  
-**Date:** February 12, 2026  
+**Version:** 2.4 (Dynamic Layout + Normalized Highlights)  
+**Date:** February 16, 2026  
 **Focus:** Fast execution, local deployment, enhanced UI/UX features without complex infrastructure.
 
 ---
@@ -49,8 +49,8 @@ This document defines the **Minimum Viable Product (MVP)** architecture for the 
 │  │                         REACT APPLICATION                                │ │
 │  │  ┌──────────┐  ┌──────────────────────┐  ┌────────────────────────┐   │ │
 │  │  │ History  │  │   Chat Panel         │  │   PDF Viewer Panel     │   │ │
-│  │  │ Sidebar  │  │   (Left 30%)         │  │   (Right 50%)          │   │ │
-│  │  │ (20%)    │  │                      │  │                        │   │ │
+│  │  │ Sidebar  │  │   (Flexible)         │  │   (Resizable 15-50%)   │   │ │
+│  │  │ (~20%)   │  │                      │  │                        │   │ │
 │  │  │          │  │ ┌──────────────────┐ │  │ - PDF.js Renderer      │   │ │
 │  │  │ Today    │  │ │ Memory Indicator │ │  │ - Highlight Overlay    │   │ │
 │  │  │ ├─Chat1  │  │ │ [●Remembering]   │ │  │ - Navigation Controls  │   │ │
@@ -106,8 +106,8 @@ App
 │   │   ├── CategorySelector
 │   │   ├── ConnectionStatusIndicator [NEW]
 │   │   └── SettingsMenu
-│   └── MainContent (Three-Panel)
-│       ├── HistorySidebar (20%) [NEW]
+│   └── MainContent (Dynamic Resizable Layout)
+│       ├── HistorySidebar (Resizable 20-30%)
 │       │   ├── NewChatButton
 │       │   ├── SearchInput
 │       │   └── ConversationList
@@ -120,7 +120,7 @@ App
 │       │               ├── Preview
 │       │               ├── Timestamp
 │       │               └── ContextMenu
-│       ├── ChatPanel (30%)
+│       ├── ChatPanel (Flexible Flex-1)
 │       │   ├── MemoryControlBar [NEW]
 │       │   │   ├── MemoryToggle
 │       │   │   └── MemoryStatusIndicator
@@ -136,7 +136,7 @@ App
 │       │   │   ├── FileAttachButton [NEW]
 │       │   │   └── SendButton
 │       │   └── DisconnectOverlay [NEW]
-│       └── PDFViewerPanel (50%)
+│       └── PDFViewerPanel (Resizable 15-50%)
 │           ├── PDFToolbar
 │           ├── PDFRenderer
 │           ├── HighlightOverlay
@@ -172,6 +172,47 @@ backend/
     ├── pdf_processor.py     # Extraction & Chunking
     └── memory_manager.py    # [V2] History Context Logic
 ```
+
+### 3.4 Dynamic Layout System [NEW]
+
+The application uses a custom resizable three-panel layout (`MainContent.tsx`) that adapts to user preference and screen size.
+
+*   **Structure:**
+    1.  **History Sidebar:** Resizable width (Min: 200px, Max: 400px, Default: 20%).
+    2.  **Chat Panel:** Flexible center panel (`flex-1`) that occupies remaining space (Min: 400px).
+    3.  **PDF Viewer:** Resizable width (Min: 250px, Max: 50%, Default: 30%).
+
+*   **Responsiveness:**
+    *   Uses a `flex-row` container with `overflow-hidden`.
+    *   Mouse event listeners track drag operations for smooth resizing.
+    *   Minimum width constraints prevent panels from collapsing or becoming unusable.
+
+### 3.5 PDF Integration & Coordinate Normalization [NEW]
+
+To handle different PDF rendering scales and device resolutions, the system implements a normalized coordinate system for highlights.
+
+1.  **Backend (Extraction):**
+    *   Extracts bounding boxes (`bbox`) in original PDF point coordinates.
+    *   Generates normalized coordinates (0.0 to 1.0) for `x`, `y`, `width`, and `height`.
+    *   Stores `page_width` and `page_height` metadata.
+
+2.  **Frontend (Viewport Scaling Layer):**
+    *   **Container Detection:** `ResizeObserver` monitors the `PDFViewerPanel` width.
+    *   **Scale Management:** Maintains a consistent `pdfBaseWidth` based on container size and a user-controlled `scale` factor.
+    *   **Aspect Ratio Preservation:** Calculates the exact pixel height of the viewport to ensure the highlight overlay perfectly matches the rendered PDF canvas.
+
+3.  **Frontend (Highlight Rendering Layer):**
+    *   **Coordinate Projection:** Maps 0-1 normalized coordinates back to the current viewport pixels.
+    *   **Layer Alignment:** Uses an absolute-positioned overlay that is a direct sibling to the PDF renderer, sharing the same parent coordinate space as the text and annotation layers.
+    *   **Dynamic Recalculation:** Re-renders highlights instantly whenever the container is resized or the zoom level changes.
+
+4.  **Local PDF Serving:**
+    *   The backend provides a unified endpoint `GET /pdf-viewer/{filename}`.
+    *   **Fallback Logic:**
+        1.  Check DB for file mapping.
+        2.  Check `PDF_DIR` (direct match).
+        3.  Check `UPLOAD_DIR` (root).
+        4.  Recursive search in `UPLOAD_DIR`.
 
 ---
 

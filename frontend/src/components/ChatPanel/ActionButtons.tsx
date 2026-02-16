@@ -45,12 +45,15 @@ export default function ActionButtons({ actions, sources }: ActionButtonsProps) 
     } else if (action.id === "open_manual") {
        if (sources && sources.length > 0) {
          const src = sources[0];
-         setPdfConfig({
-           filename: src.filename,
-           pageNumber: src.page || 1,
-           highlights: src.bbox ? [src.bbox] : [],
-           fileUrl: `${API_BASE_URL}/files/${src.rel_path || src.filename}`
-         });
+         // Use the unified PDF viewer endpoint
+         const fileUrl = `${API_BASE_URL}/pdf-viewer/${src.rel_path || src.filename}`;
+
+          setPdfConfig({
+            filename: src.filename,
+            pageNumber: src.page || 1,
+            highlights: [], // Removed highlighting for "Open Manual"
+            fileUrl: fileUrl
+          });
        } else {
          alert("No manual source found for this message.");
        }

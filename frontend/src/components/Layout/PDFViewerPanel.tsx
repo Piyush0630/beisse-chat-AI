@@ -7,7 +7,10 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
 // Set up the worker for react-pdf
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
 
 import { useChatStore } from "@/lib/store";
 
@@ -17,6 +20,7 @@ export default function PDFViewerPanel() {
   
   const [numPages, setNumPages] = React.useState<number>(0);
   const [scale, setScale] = React.useState<number>(1.0);
+  const [pageDimensions, setPageDimensions] = React.useState<{width: number, height: number} | null>(null);
   const [showSearch, setShowSearch] = React.useState(false);
   const [pdfSearchTerm, setPdfSearchTerm] = React.useState("");
   const [containerWidth, setContainerWidth] = React.useState<number>(0);
@@ -26,7 +30,14 @@ export default function PDFViewerPanel() {
     if (containerRef.current) {
       const resizeObserver = new ResizeObserver((entries) => {
         for (let entry of entries) {
-          setContainerWidth(entry.contentRect.width);
+          const newWidth = Math.floor(entry.contentRect.width);
+          setContainerWidth((prev) => {
+            // Keep threshold low for smooth dynamic resizing
+            if (Math.abs(prev - newWidth) > 1) {
+              return newWidth;
+            }
+            return prev;
+          });
         }
       });
       resizeObserver.observe(containerRef.current);
@@ -38,12 +49,19 @@ export default function PDFViewerPanel() {
     setNumPages(numPages);
   }
 
+  function onPageLoadSuccess(page: any) {
+    setPageDimensions({ width: page.width, height: page.height });
+  }
+
   const setPageNumber = (p: number | ((prev: number) => number)) => {
     const newPage = typeof p === 'function' ? p(pdfConfig.pageNumber) : p;
-    setPdfConfig({ pageNumber: newPage });
+    setPdfConfig({ pageNumber: newPage, highlights: [] });
   };
 
   const pageNumber = pdfConfig.pageNumber;
+
+  // Consistent width calculation for the PDF.js renderer
+  const pdfRenderWidth = containerWidth > 40 ? containerWidth - 40 : 595;
 
   return (
     <section className="flex h-full flex-col bg-zinc-100 dark:bg-zinc-900 min-w-0">
@@ -123,24 +141,34 @@ export default function PDFViewerPanel() {
       
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto bg-zinc-200 dark:bg-zinc-900"
+        className="flex-1 overflow-y-scroll bg-zinc-200 dark:bg-zinc-900"
       >
-        <div className="min-h-full p-8 flex justify-center items-start">
+        <div className="min-h-full p-4 sm:p-8 flex justify-center items-start">
           <div className="shadow-2xl bg-white dark:bg-zinc-800">
             <Document
               file={pdfConfig.fileUrl}
               onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={(error) => console.error("PDF Load Error:", error)}
               loading={
                 <div
-                  style={{ width: containerWidth > 100 ? containerWidth - 64 : 595 }}
+                  style={{ width: pdfRenderWidth }}
                   className="h-[842px] flex items-center justify-center text-zinc-400"
                 >
                   Loading PDF...
                 </div>
               }
+              error={
+                <div
+                  style={{ width: pdfRenderWidth }}
+                  className="h-[842px] flex flex-col items-center justify-center text-red-500 gap-2"
+                >
+                  <p>Failed to load PDF file.</p>
+                  <p className="text-xs text-zinc-500">{pdfConfig.fileUrl}</p>
+                </div>
+              }
               noData={
                 <div
-                  style={{ width: containerWidth > 100 ? containerWidth - 64 : 595 }}
+                  style={{ width: pdfRenderWidth }}
                   className="h-[842px] flex items-center justify-center text-zinc-400"
                 >
                   Select a citation to load PDF
@@ -148,32 +176,49 @@ export default function PDFViewerPanel() {
               }
             >
               {numPages > 0 && (
-                <div className="relative">
+                /* Viewport Scaling Layer with CSS Aspect Ratio for instant resizing */
+                <div 
+                  className="relative mx-auto shadow-lg bg-white overflow-hidden"
+                  style={{ 
+                    width: pdfRenderWidth * scale,
+                    maxWidth: '100%',
+                    aspectRatio: pageDimensions ? `${pageDimensions.width} / ${pageDimensions.height}` : 'auto'
+                  }}
+                >
                   <Page
                     pageNumber={pageNumber}
-                    width={containerWidth > 100 ? containerWidth - 100 : undefined}
-                  scale={scale}
-                  renderAnnotationLayer={true}
-                  renderTextLayer={true}
-                />
-                {pdfConfig.highlights.map((bbox, idx) => (
-                  <div
-                    key={idx}
-                    className="absolute border-2 border-orange-400 bg-yellow-400/30 pointer-events-none z-10"
-                    style={{
-                      left: bbox.x * scale,
-                      top: bbox.y * scale,
-                      width: bbox.width * scale,
-                      height: bbox.height * scale,
-                    }}
+                    onLoadSuccess={onPageLoadSuccess}
+                    width={pdfRenderWidth}
+                    scale={scale}
+                    renderAnnotationLayer={true}
+                    renderTextLayer={true}
                   />
-                ))}
-              </div>
-            )}
-          </Document>
+                   {/* Highlight Rendering Layer: Uses normalized % coordinates for fluid responsiveness */}
+                   {pageDimensions && pdfConfig.highlights.map((bbox, idx) => {
+                     const x_norm = bbox.x_norm !== undefined ? bbox.x_norm : (bbox.x / (bbox.page_width || pageDimensions.width));
+                     const y_norm = bbox.y_norm !== undefined ? bbox.y_norm : (bbox.y / (bbox.page_height || pageDimensions.height));
+                     const w_norm = bbox.w_norm !== undefined ? bbox.w_norm : (bbox.width / (bbox.page_width || pageDimensions.width));
+                     const h_norm = bbox.h_norm !== undefined ? bbox.h_norm : (bbox.height / (bbox.page_height || pageDimensions.height));
+
+                     return (
+                       <div
+                         key={idx}
+                         className="absolute border-2 border-orange-400 bg-yellow-400/30 pointer-events-none z-10"
+                         style={{
+                           left: `${x_norm * 100}%`,
+                           top: `${y_norm * 100}%`,
+                           width: `${w_norm * 100}%`,
+                           height: `${h_norm * 100}%`,
+                         }}
+                       />
+                     );
+                   })}
+                </div>
+              )}
+            </Document>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
   );
 }
