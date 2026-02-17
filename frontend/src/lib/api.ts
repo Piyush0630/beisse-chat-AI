@@ -91,7 +91,17 @@ export const chatApi = {
   uploadFile: async (conversationId: string, file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post(`/api/files/upload?conversation_id=${conversationId}`, formData, {
+    const response = await api.post(`/api/files/upload-session?conversation_id=${conversationId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+  uploadGlobal: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/api/files/upload-global', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -114,14 +124,7 @@ export const chatApi = {
 
 export const pdfApi = {
   uploadPdf: async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await api.post('/pdf/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    return chatApi.uploadGlobal(file);
   },
   listPdfs: async () => {
     const response = await api.get('/pdf/list');

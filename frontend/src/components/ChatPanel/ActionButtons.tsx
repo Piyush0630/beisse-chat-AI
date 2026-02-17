@@ -16,9 +16,11 @@ interface ActionButtonsProps {
 
 import { useChatStore } from "@/lib/store";
 import { API_BASE_URL } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 export default function ActionButtons({ actions, sources }: ActionButtonsProps) {
   const setPdfConfig = useChatStore((state) => state.setPdfConfig);
+  const router = useRouter();
 
   if (!actions || actions.length === 0) return null;
 
@@ -39,7 +41,7 @@ export default function ActionButtons({ actions, sources }: ActionButtonsProps) 
     console.log(`Action clicked: ${action.id}`, action);
     // For now, we just log. In a real app, this would trigger navigation or specific logic.
     if (action.id === "view_dashboard") {
-       alert("Navigating to Dashboard (Simulation)");
+       router.push("/dashboard");
     } else if (action.id === "download_report") {
        alert("Downloading Report (Simulation)");
     } else if (action.id === "open_manual") {

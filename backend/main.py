@@ -74,15 +74,17 @@ async def serve_pdf(filename: str, db: Session = Depends(get_db)):
     upload_path = os.path.join(settings.UPLOAD_DIR, filename)
     if os.path.exists(upload_path):
         return FileResponse(upload_path)
-        
-    raise HTTPException(status_code=404, detail=f"File not found: {filename}")
     
-    # 4. Recursive search in UPLOAD_DIR (last resort)
+    # 4. Recursive search in UPLOAD_DIR (for session files in subdirectories)
     base_filename = os.path.basename(filename)
+    print(f"Searching for {base_filename} in {settings.UPLOAD_DIR}")
     for root, dirs, files in os.walk(settings.UPLOAD_DIR):
         if base_filename in files:
-            return FileResponse(os.path.join(root, base_filename))
+            full_path = os.path.join(root, base_filename)
+            print(f"Found file at {full_path}")
+            return FileResponse(full_path)
             
+    print(f"File {base_filename} not found in any subdirectory of {settings.UPLOAD_DIR}")
     raise HTTPException(status_code=404, detail=f"PDF file {filename} not found")
 
 class ChatRequest(BaseModel):
@@ -247,7 +249,7 @@ async def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
         full_answer = ""
         sources = []
         
-        for chunk_str in rag_pipeline.query_stream(request.query, history=history, additional_context=additional_context):
+        for chunk_str in rag_pipeline.query_stream(request.query, history=history, additional_context=additional_context, conversation_id=conversation_id):
             chunk_data = json.loads(chunk_str)
             if chunk_data["type"] == "metadata":
                 sources = chunk_data["sources"]
@@ -344,7 +346,7 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
                 print(f"Error reading file {file.filename}: {e}")
 
     try:
-        result = rag_pipeline.query(request.query, history=history, additional_context=additional_context)
+        result = rag_pipeline.query(request.query, history=history, additional_context=additional_context, conversation_id=conversation_id)
     except Exception as e:
         print(f"Error in RAG pipeline: {e}")
         raise HTTPException(status_code=500, detail=f"Error in RAG pipeline: {str(e)}")

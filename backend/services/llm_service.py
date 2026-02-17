@@ -17,6 +17,28 @@ class LLMService:
                 "max_output_tokens": 2048,
             }
         )
+        # Store for session-specific context
+        # session_id: [{"chunks": [str], "embeddings": [list]}]
+        self.session_context_store: Dict[str, List[Dict]] = {}
+
+    def add_session_document(self, session_id: str, chunks: List[str], embeddings: List[List[float]], metadata: List[Dict] = None):
+        """
+        Adds a document's chunks and embeddings to a specific session's temporary store.
+        """
+        if session_id not in self.session_context_store:
+            self.session_context_store[session_id] = []
+        
+        self.session_context_store[session_id].append({
+            "chunks": chunks,
+            "embeddings": embeddings,
+            "metadata": metadata or []
+        })
+
+    def get_session_context(self, session_id: str) -> List[Dict]:
+        """
+        Retrieves all temporary documents for a session.
+        """
+        return self.session_context_store.get(session_id, [])
 
     def generate_answer(self, query: str, context: str, history: List[Dict[str, str]] = None) -> str:
         """
@@ -45,13 +67,16 @@ class LLMService:
                 history_text += f"{role}: {msg['content']}\n"
 
         return f"""
-You are a helpful assistant for Biesse. Use the following context and conversation history to answer the user's question.
+You are a helpful assistant for Biesse. Use the provided context and conversation history to answer the question.
 
-Guidelines:
-1. If the user greets you or asks general questions (e.g., "Hi", "How are you?"), respond politely and professionally.
-2. If the user asks a question that can be answered using the provided context, provide a detailed answer with citations.
-3. If the context doesn't contain the answer for a technical question about Biesse machines, say you don't know based on the provided documents.
-4. Always maintain a helpful and professional tone.
+IMPORTANT INSTRUCTIONS:
+1. The context may contain both "[CURRENT SESSION FILE CONTEXT]" and "[GLOBAL KNOWLEDGE BASE]".
+2. If the user asks about an attached file, a profile, a resume, or "this file", PRIORITIZE the "[CURRENT SESSION FILE CONTEXT]".
+3. If the user's question is about Biesse machine manuals and technical specs, use the "[GLOBAL KNOWLEDGE BASE]".
+4. DO NOT hallucinate page numbers or references. ONLY cite page numbers if they are explicitly mentioned as "Page X" in the provided context for that specific document.
+5. If you are answering from "[CURRENT SESSION FILE CONTEXT]" and it doesn't mention page numbers, DO NOT add any page citations.
+6. If the context doesn't contain the answer, state that you don't have enough information from the provided documents.
+7. DO NOT mix the contexts unless they are relevant to each other.
 
 {history_text}
 

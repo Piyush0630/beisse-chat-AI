@@ -42,9 +42,10 @@ export default function TopToolbar() {
       await pdfApi.uploadPdf(file);
       await fetchPdfs();
       if (fileInputRef.current) fileInputRef.current.value = "";
+      alert("Document uploaded and indexed globally.");
     } catch (error) {
       console.error("Upload failed", error);
-      alert("Upload failed");
+      alert("Upload failed. Please ensure the file is a PDF.");
     } finally {
       setIsLoading(false);
     }

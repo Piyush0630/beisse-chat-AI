@@ -3,7 +3,6 @@
 import React from "react";
 import MessageList from "@/components/ChatPanel/MessageList";
 import InputBox from "@/components/ChatPanel/InputBox";
-import FileUpload from "@/components/ChatPanel/FileUpload";
 import { BrainCircuit } from "lucide-react";
 import { useChatStore } from "@/lib/store";
 import { chatApi } from "@/lib/api";
@@ -44,7 +43,6 @@ export default function ChatPanel() {
         <MessageList />
       </div>
       
-      <FileUpload />
       <div className="p-4 border-t">
         <InputBox />
       </div>
