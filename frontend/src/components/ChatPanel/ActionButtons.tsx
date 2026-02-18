@@ -64,16 +64,18 @@ export default function ActionButtons({ actions, sources }: ActionButtonsProps) 
 
   return (
     <div className="mt-3 flex flex-wrap gap-2">
-      {actions.map((action) => (
-        <button
-          key={action.id}
-          onClick={() => handleActionClick(action)}
-          className="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
-        >
-          {getIcon(action.type)}
-          {action.label}
-        </button>
-      ))}
+      {actions
+        .filter(action => action.id !== "open_manual" && action.id !== "view_dashboard")
+        .map((action) => (
+          <button
+            key={action.id}
+            onClick={() => handleActionClick(action)}
+            className="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
+          >
+            {getIcon(action.type)}
+            {action.label}
+          </button>
+        ))}
     </div>
   );
 }

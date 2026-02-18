@@ -70,6 +70,8 @@ export default function InputBox() {
               sources: data.sources.map((s: any) => ({
                 page: s.page,
                 filename: s.filename,
+                rel_path: s.rel_path,
+                chunk_id: s.chunk_id,
                 bbox: s.bbox
               }))
             });

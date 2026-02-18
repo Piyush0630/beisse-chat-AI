@@ -35,36 +35,72 @@ export default function MessageList() {
               : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
           }`}>
             <div className="prose dark:prose-invert prose-sm max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {msg.content}
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  a: ({ href, children }) => {
+                    if (href?.startsWith('#source-')) {
+                      const idx = parseInt(href.replace('#source-', ''));
+                      const src = msg.sources?.[idx];
+                      if (!src) return null;
+                      
+                      return (
+                        <span
+                          className="text-blue-500 hover:underline cursor-pointer text-sm ml-2 inline-flex items-center"
+                          onClick={() => {
+                            const filename = src.rel_path || src.filename;
+                            const fileUrl = `${API_BASE_URL}/pdf-viewer/${encodeURIComponent(filename)}`;
+                            setPdfConfig({
+                              filename: src.filename,
+                              pageNumber: src.page,
+                              highlights: src.bbox ? [src.bbox] : [],
+                              fileUrl: fileUrl
+                            });
+                          }}
+                        >
+                          [View Context]
+                        </span>
+                      );
+                    }
+                    return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
+                  }
+                }}
+              >
+                {(() => {
+                  if (!msg.sources || msg.sources.length === 0 || msg.role === 'user') return msg.content;
+                  
+                  const blocks = msg.content.split(/\n\n/);
+                  let sourceIdx = 0;
+                  const processedBlocks = blocks.map(block => {
+                    if (block.trim().startsWith('* ') || block.trim().startsWith('- ') || /^\d+\. /.test(block.trim())) {
+                      const items = block.split('\n');
+                      return items.map(item => {
+                        if (item.trim() && sourceIdx < msg.sources!.length) {
+                          return `${item} [View Context](#source-${sourceIdx++})`;
+                        }
+                        return item;
+                      }).join('\n');
+                    } else {
+                      if (block.trim() && sourceIdx < msg.sources!.length) {
+                        return `${block} [View Context](#source-${sourceIdx++})`;
+                      }
+                      return block;
+                    }
+                  });
+
+                  // If there are still sources left, append them to the last block
+                  if (sourceIdx < msg.sources.length) {
+                    let remaining = "";
+                    while (sourceIdx < msg.sources.length) {
+                      remaining += ` [View Context](#source-${sourceIdx++})`;
+                    }
+                    processedBlocks[processedBlocks.length - 1] += remaining;
+                  }
+                  
+                  return processedBlocks.join('\n\n');
+                })()}
               </ReactMarkdown>
             </div>
-            
-            {msg.sources && msg.sources.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2 border-t pt-2 border-zinc-200 dark:border-zinc-700">
-                {msg.sources.map((src, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      // Use the unified PDF viewer endpoint
-                      const filename = src.rel_path || src.filename;
-                      const fileUrl = `${API_BASE_URL}/pdf-viewer/${encodeURIComponent(filename)}`;
-                        
-                      setPdfConfig({
-                        filename: src.filename,
-                        pageNumber: src.page,
-                        highlights: src.bbox ? [src.bbox] : [],
-                        fileUrl: fileUrl
-                      });
-                    }}
-                    className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    <FileText className="h-3 w-3" />
-                    Page {src.page}
-                  </button>
-                ))}
-              </div>
-            )}
 
             {msg.actions && msg.actions.length > 0 && (
               <ActionButtons actions={msg.actions} sources={msg.sources} />
