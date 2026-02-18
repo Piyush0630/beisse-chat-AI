@@ -89,8 +89,8 @@ export default function HistorySidebar() {
   };
 
   return (
-    <aside className="w-full h-full border-r bg-zinc-50 dark:bg-zinc-900/50 flex flex-col overflow-hidden">
-      <div className="p-4 border-b space-y-3">
+    <aside className="w-full h-full border-r border-zinc-800 bg-zinc-900/50 flex flex-col overflow-hidden text-zinc-100">
+      <div className="p-4 border-b border-zinc-800 space-y-3">
         <button
           onClick={handleNewChat}
           className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
@@ -106,7 +106,7 @@ export default function HistorySidebar() {
             placeholder="Search chats..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-md border border-zinc-200 bg-white pl-9 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-800 dark:bg-zinc-950"
+            className="w-full rounded-md border border-zinc-800 bg-zinc-950 pl-9 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-zinc-100"
           />
         </div>
       </div>
@@ -136,8 +136,8 @@ export default function HistorySidebar() {
                   onClick={() => handleSelectConversation(conv.id)}
                   className={`group flex items-center gap-2 rounded-md px-3 py-2 text-sm cursor-pointer transition-colors ${
                     currentConversationId === conv.id
-                      ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
-                      : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                      ? "bg-blue-900/20 text-blue-400 font-medium"
+                      : "text-zinc-400 hover:bg-zinc-800"
                   }`}
                 >
                   <MessageSquare className="h-4 w-4 shrink-0" />

@@ -39,8 +39,11 @@ export default function TopToolbar() {
 
     setIsLoading(true);
     try {
-      await pdfApi.uploadPdf(file);
+      const newPdf = await pdfApi.uploadPdf(file);
       await fetchPdfs();
+      if (newPdf && newPdf.id) {
+        setSelectedPdfId(newPdf.id);
+      }
       if (fileInputRef.current) fileInputRef.current.value = "";
       alert("Document uploaded and indexed globally.");
     } catch (error) {

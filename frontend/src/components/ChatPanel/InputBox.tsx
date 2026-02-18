@@ -148,7 +148,7 @@ export default function InputBox() {
           {attachedFiles.map((file) => (
             <div 
               key={file.id} 
-              className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded text-[10px] text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+              className="flex items-center gap-1.5 bg-zinc-800 px-2 py-1 rounded text-[10px] text-zinc-400 border border-zinc-700"
             >
               <FileText className="h-3 w-3" />
               <span className="max-w-[100px] truncate">{file.filename}</span>
@@ -171,7 +171,7 @@ export default function InputBox() {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading || isLoading}
-          className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 disabled:opacity-50"
+          className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-500 disabled:opacity-50"
           title="Upload session files"
         >
           {isUploading ? (
@@ -194,7 +194,7 @@ export default function InputBox() {
               }
             }}
             placeholder="Ask about machine operation..."
-            className="w-full resize-none bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl py-2.5 pl-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full resize-none bg-zinc-900 border border-zinc-800 rounded-xl py-2.5 pl-4 pr-12 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder-zinc-500"
             style={{ maxHeight: '200px' }}
           />
           <button

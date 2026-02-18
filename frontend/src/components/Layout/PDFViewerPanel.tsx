@@ -64,8 +64,8 @@ export default function PDFViewerPanel() {
   const pdfRenderWidth = containerWidth > 40 ? containerWidth - 40 : 595;
 
   return (
-    <section className="flex h-full flex-col bg-zinc-100 dark:bg-zinc-900 min-w-0">
-      <div className="flex h-12 items-center justify-between border-b bg-white px-2 dark:bg-zinc-950 gap-2 min-w-0">
+    <section className="flex h-full flex-col bg-zinc-900 min-w-0">
+      <div className="flex h-12 items-center justify-between border-b bg-zinc-950 px-2 gap-2 min-w-0">
         <div className="flex items-center gap-2 min-w-0 overflow-hidden">
           <span className="text-sm font-medium truncate shrink hidden sm:inline">
             {pdfConfig.filename || "No document"}
@@ -118,7 +118,7 @@ export default function PDFViewerPanel() {
                 placeholder="Find..."
                 value={pdfSearchTerm}
                 onChange={(e) => setPdfSearchTerm(e.target.value)}
-                className="w-20 sm:w-28 rounded-md border border-zinc-200 bg-white px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-800 dark:bg-zinc-950 mr-1"
+                className="w-20 sm:w-28 rounded-md border border-zinc-800 bg-zinc-950 px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 mr-1"
               />
             )}
             <button
@@ -141,10 +141,10 @@ export default function PDFViewerPanel() {
       
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-scroll bg-zinc-200 dark:bg-zinc-900"
+        className="flex-1 overflow-y-scroll bg-zinc-900"
       >
         <div className="min-h-full p-4 sm:p-8 flex justify-center items-start">
-          <div className="shadow-2xl bg-white dark:bg-zinc-800">
+          <div className="shadow-2xl bg-zinc-800">
             <Document
               file={pdfConfig.fileUrl}
               onLoadSuccess={onDocumentLoadSuccess}

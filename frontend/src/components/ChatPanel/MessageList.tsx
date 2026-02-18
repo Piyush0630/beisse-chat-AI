@@ -30,9 +30,9 @@ export default function MessageList() {
           )}
           
           <div className={`max-w-[85%] rounded-2xl px-4 py-2 ${
-            msg.role === 'user' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
+            msg.role === 'user'
+              ? 'bg-blue-600 text-white'
+              : 'bg-zinc-800 text-zinc-100'
           }`}>
             <div className="prose dark:prose-invert prose-sm max-w-none">
               <ReactMarkdown
@@ -108,7 +108,7 @@ export default function MessageList() {
           </div>
 
           {msg.role === 'user' && (
-            <div className="h-8 w-8 rounded-full bg-zinc-200 flex items-center justify-center text-zinc-600 flex-shrink-0">
+            <div className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 flex-shrink-0">
               <User className="h-5 w-5" />
             </div>
           )}

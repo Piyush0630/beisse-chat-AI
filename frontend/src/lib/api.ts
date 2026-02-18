@@ -124,7 +124,14 @@ export const chatApi = {
 
 export const pdfApi = {
   uploadPdf: async (file: File) => {
-    return chatApi.uploadGlobal(file);
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/pdf/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
   },
   listPdfs: async () => {
     const response = await api.get('/pdf/list');

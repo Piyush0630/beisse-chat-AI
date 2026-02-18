@@ -10,7 +10,7 @@ export default function Header() {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-white px-6 dark:bg-zinc-950">
+    <header className="flex h-16 items-center justify-between border-b border-zinc-800 bg-zinc-950 px-6 text-zinc-100">
       <div className="flex items-center gap-4">
         <div className="h-8 w-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold">
           B
@@ -35,7 +35,7 @@ export default function Header() {
         
         <button
           onClick={() => setIsSettingsOpen(true)}
-          className="rounded-full p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          className="rounded-full p-2 hover:bg-zinc-800 transition-colors"
           title="Settings"
         >
           <Settings className="h-5 w-5" />

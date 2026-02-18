@@ -28,15 +28,15 @@ export default function DisconnectModal() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+      <div className="w-full max-w-sm rounded-2xl bg-zinc-900 p-6 shadow-2xl border border-zinc-800 text-zinc-100">
         <div className="flex flex-col items-center text-center">
-          <div className="mb-4 rounded-full bg-red-100 p-3 dark:bg-red-900/30">
-            <WifiOff className="h-6 w-6 text-red-600 dark:text-red-400" />
+          <div className="mb-4 rounded-full bg-red-900/30 p-3">
+            <WifiOff className="h-6 w-6 text-red-400" />
           </div>
-          <h3 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <h3 className="mb-2 text-lg font-semibold text-zinc-100">
             Connection Lost
           </h3>
-          <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mb-6 text-sm text-zinc-400">
             We've lost connection to the Biesse Chat server. Please check your network or try reconnecting.
           </p>
           <button
